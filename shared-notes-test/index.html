@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Shared notes</title>
+<style>
+  :root { --bg: #f6f5f2; --card: #fff; --ink: #1f1f1f; --muted: #6b6b6b; --line: #e3e1dc; --accent: #2f5d50; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #161616; --card: #202020; --ink: #ececec; --muted: #9a9a9a; --line: #333; --accent: #7fb8a6; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 40px 16px 96px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+  .note { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+  .note textarea { width: 100%; min-height: 64px; border: 0; resize: vertical; background: transparent; color: inherit; font: inherit; outline: none; }
+  .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; margin-top: 6px; }
+  .meta button { font: inherit; color: var(--muted); background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 0; }
+  #add { font: inherit; background: var(--accent); color: #fff; border: 0; border-radius: 999px; padding: 10px 18px; cursor: pointer; }
+  .empty { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Shared notes</h1>
+  <p class="sub">A test page. Edits save automatically and appear for everyone with access.</p>
+  <div id="notes"></div>
+  <button id="add" type="button">Add a note</button>
+</main>
+<script>
+  const list = document.getElementById('notes');
+  const when = iso => iso ? new Date(iso).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'just now';
+
+  function noteEl(r) {
+    const card = document.createElement('div');
+    card.className = 'note';
+    card.dataset.id = r.id;
+    const ta = document.createElement('textarea');
+    ta.value = r.data.text || '';
+    ta.placeholder = 'Write a note...';
+    ta.oninput = () => Live.save(r.id, { text: ta.value });
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const who = document.createElement('span');
+    who.textContent = 'Last edited by ' + (r.updated_by || 'you') + ', ' + when(r.updated_at);
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.textContent = 'Delete';
+    del.onclick = () => { Live.remove(r.id); card.remove(); if (!list.children.length) render(Live.records); };
+    meta.append(who, del);
+    card.append(ta, meta);
+    return card;
+  }
+
+  function render(records) {
+    const focused = document.activeElement?.closest?.('.note')?.dataset.id;
+    const rows = [...records.values()].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
+    const keep = focused ? list.querySelector(`.note[data-id="${CSS.escape(focused)}"]`) : null;
+    list.replaceChildren(...rows.map(r => (r.id === focused && keep) ? keep : noteEl(r)));
+    if (!rows.length) {
+      const p = document.createElement('p');
+      p.className = 'empty';
+      p.textContent = 'No notes yet.';
+      list.append(p);
+    }
+  }
+
+  window.onLiveRecords = records => render(records);
+
+  document.getElementById('add').onclick = () => {
+    const id = 'note-' + crypto.randomUUID().slice(0, 8);
+    Live.save(id, { text: '' }, { delay: 0 });
+    render(Live.records);
+    list.querySelector(`.note[data-id="${id}"] textarea`)?.focus();
+  };
+</script>
+<!-- ============ LIVE LAYER v1.1 (live-sites skill) ============ -->
+<!-- v1.1 (2026-10-13): optional per-page passcode, anonymous presence keys, single-boot guard -->
+<style>
+  #live-bar { position: fixed; right: 12px; bottom: 12px; z-index: 9999; display: flex; gap: 10px; align-items: center;
+    font: 12px/1.3 system-ui, sans-serif; background: rgba(20,20,20,.86); color: #fff; padding: 6px 10px; border-radius: 999px; }
+  #live-bar button { font: inherit; color: inherit; background: none; border: 0; text-decoration: underline; cursor: pointer; padding: 0; }
+  #live-gate { position: fixed; inset: 0; z-index: 9998; display: flex; align-items: center; justify-content: center;
+    background: rgba(250,250,250,.97); font: 15px/1.5 system-ui, sans-serif; color: #222; padding: 16px; }
+  #live-gate[hidden] { display: none; }
+  #live-gate .box { max-width: 360px; width: 100%; display: grid; gap: 10px; text-align: center; }
+  #live-gate input, #live-gate button { font: inherit; padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; }
+  #live-gate button { background: #222; color: #fff; border-color: #222; cursor: pointer; }
+  #live-gate .alt { background: none; color: #222; border: 0; text-decoration: underline; }
+  #live-gate .or { font-size: 13px; color: #777; margin-top: 6px; }
+</style>
+<div id="live-bar"><span id="live-status">Connecting...</span><span id="live-people"></span><span id="live-me"></span></div>
+<div id="live-gate" hidden><div class="box">
+  <strong id="live-gate-title">Sign in to open this page</strong>
+  <span id="live-gate-msg"></span>
+  <div id="live-gate-form" style="display:grid;gap:10px"></div>
+</div></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/+esm';
+
+const CFG = {
+  url: 'https://wjrqigcbfknxhjeysvar.supabase.co',          // https://<ref>.supabase.co
+  key: 'sb_publishable_xHsEfrBBdyn0_42TnVBPGg_ZnQnnnw7',       // publishable or anon key ONLY
+  app: 'shared-notes-test',              // row in public.apps
+  signIn: 'password',             // 'google' | 'email' | 'password' | 'none' (passcode or open pages only)
+  passcode: false            // true if this page has a passcode (public.app_passcodes), else false
+};
+
+const sb = createClient(CFG.url, CFG.key);
+const records = new Map();
+const timers = new Map();
+let me = null, channel = null, booted = false, booting = false, unlocking = false;
+const $ = s => document.getElementById(s);
+const status = t => { $('live-status').textContent = t; };
+const here = location.origin + location.pathname;
+
+async function boot() {
+  if (booted || booting) return;
+  booting = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    me = session?.user?.email || null;                     // null for passcode guests (anonymous sessions)
+    const { data: allowed, error } = await sb.rpc('can_read', { p_app: CFG.app });
+    if (error) { status('Cannot reach the database (it may be paused)'); return; }
+    if (!allowed) { showGate(); return; }
+    booted = true;
+    $('live-gate').hidden = true;
+    $('live-me').innerHTML = '';
+    if (me) {
+      const b = document.createElement('button');
+      b.textContent = 'Sign out';
+      b.onclick = () => sb.auth.signOut().then(() => location.reload());
+      $('live-me').append(b);
+    }
+    await loadAll();
+    subscribe();
+  } finally {
+    booting = false;
+  }
+}
+
+async function loadAll() {
+  const { data, error } = await sb.from('app_records')
+    .select('id,data,sort,updated_at,updated_by')
+    .eq('app', CFG.app)
+    .order('sort', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: true });
+  if (error) { status('Load failed: ' + error.message); return; }
+  records.clear();
+  data.forEach(r => records.set(r.id, r));
+  window.onLiveRecords?.(records, { initial: true });
+  status('Live');
+}
+
+function save(id, data, opts = {}) {
+  const prev = records.get(id) || {};
+  const row = { ...prev, id, data, sort: opts.sort ?? prev.sort ?? Date.now() };
+  records.set(id, row);
+  clearTimeout(timers.get(id));
+  status('Saving...');
+  timers.set(id, setTimeout(async () => {
+    timers.delete(id);
+    const { error } = await sb.from('app_records')
+      .upsert({ app: CFG.app, id, data: row.data, sort: row.sort });
+    status(error ? 'NOT SAVED: ' + error.message : 'All changes saved');
+  }, opts.delay ?? 400));
+}
+
+async function remove(id) {
+  clearTimeout(timers.get(id)); timers.delete(id);
+  records.delete(id);
+  const { error } = await sb.from('app_records').delete().eq('app', CFG.app).eq('id', id);
+  status(error ? 'NOT DELETED: ' + error.message : 'All changes saved');
+}
+
+function subscribe() {
+  // Presence keys are random per tab, never emails: anyone who knows the slug can join the presence channel.
+  const key = crypto.randomUUID().slice(0, 8);
+  channel = sb.channel('live:' + CFG.app, { config: { presence: { key } } });
+  const apply = p => {
+    if (p.eventType === 'DELETE') {
+      const old = p.old || {};
+      if (old.app !== CFG.app || !records.has(old.id)) return;
+      records.delete(old.id);
+    } else {
+      const r = p.new;
+      if (timers.has(r.id)) return;                        // my unsaved edit wins until it saves
+      const cur = records.get(r.id);
+      const same = cur && cur.sort === r.sort && JSON.stringify(cur.data) === JSON.stringify(r.data);
+      records.set(r.id, r);
+      if (same) return;                                    // echo of my own save
+    }
+    window.onLiveRecords?.(records, { initial: false, change: p });
+  };
+  const f = 'app=eq.' + CFG.app;
+  channel
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'app_records', filter: f }, apply)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'app_records', filter: f }, apply)
+    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'app_records' }, apply)
+    .on('presence', { event: 'sync' }, () => {
+      const people = Object.keys(channel.presenceState());
+      $('live-people').textContent = people.length > 1 ? people.length + ' here now' : 'Just you';
+      window.onLivePresence?.(people);
+    })
+    .subscribe(async s => {
+      if (s === 'SUBSCRIBED') { await channel.track({ at: Date.now() }); status('Live'); }
+      if (s === 'CHANNEL_ERROR' || s === 'TIMED_OUT') status('Reconnecting...');
+    });
+}
+
+async function unlockWith(code) {
+  code = (code || '').trim();
+  if (!code) return;
+  unlocking = true;
+  $('live-gate-msg').textContent = 'Checking...';
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      const { error } = await sb.auth.signInAnonymously();
+      if (error) { $('live-gate-msg').textContent = 'Could not open a session: ' + error.message; return; }
+    }
+    const { data: ok, error } = await sb.rpc('unlock', { p_app: CFG.app, p_code: code });
+    if (error) { $('live-gate-msg').textContent = error.message; return; }
+    if (!ok) { $('live-gate-msg').textContent = 'That passcode is not right. Check it and try again.'; return; }
+  } finally {
+    unlocking = false;
+  }
+  boot();
+}
+
+function showGate() {
+  $('live-gate').hidden = false;
+  status(CFG.passcode ? 'Locked' : 'Sign-in needed');
+  const form = $('live-gate-form');
+  form.innerHTML = '';
+  $('live-gate-msg').textContent = '';
+  const btn = (label, fn, cls) => { const b = document.createElement('button'); b.textContent = label; b.onclick = fn; if (cls) b.className = cls; form.append(b); return b; };
+  const input = (type, ph) => { const i = document.createElement('input'); i.type = type; i.placeholder = ph; form.append(i); return i; };
+  const note = t => { const s = document.createElement('span'); s.className = 'or'; s.textContent = t; form.append(s); };
+
+  if (CFG.passcode) {
+    $('live-gate-title').textContent = 'Enter the passcode to open this page';
+    const c = input('password', 'Passcode');
+    c.autocomplete = 'off';
+    const go = btn('Open page', () => unlockWith(c.value));
+    c.onkeydown = e => { if (e.key === 'Enter') go.click(); };
+    setTimeout(() => c.focus(), 0);
+  }
+
+  if (me) {
+    if (!CFG.passcode) {
+      $('live-gate-title').textContent = 'No access yet';
+      $('live-gate-msg').textContent = 'You are signed in as ' + me + ', but this page has not been shared with that account. Ask the owner to add you.';
+    }
+    btn('Sign in with a different account', () => sb.auth.signOut().then(() => location.reload()), 'alt');
+    return;
+  }
+
+  if (CFG.signIn === 'none') {
+    if (!CFG.passcode) {
+      $('live-gate-title').textContent = 'This page is not available';
+      $('live-gate-msg').textContent = 'Ask the person who sent you the link.';
+    }
+    return;
+  }
+  if (CFG.passcode) note('Invited by email?');
+  const alt = CFG.passcode ? 'alt' : '';
+  if (CFG.signIn === 'google') {
+    btn('Sign in with Google', () => sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: here } }), alt);
+  } else if (CFG.signIn === 'email') {
+    const e = input('email', 'Your email');
+    btn('Email me a sign-in link', async () => {
+      const { error } = await sb.auth.signInWithOtp({ email: e.value.trim(), options: { emailRedirectTo: here, shouldCreateUser: true } });
+      $('live-gate-msg').textContent = error ? error.message : 'Check your inbox for the sign-in link.';
+    }, alt);
+  } else {
+    const e = input('email', 'Email'), pw = input('password', 'Password');
+    btn('Sign in', async () => {
+      const { error } = await sb.auth.signInWithPassword({ email: e.value.trim(), password: pw.value });
+      if (error) $('live-gate-msg').textContent = error.message; else location.reload();
+    }, alt);
+  }
+}
+
+// Never await Supabase calls directly inside this callback (it can deadlock); defer instead.
+sb.auth.onAuthStateChange(evt => {
+  if (evt === 'SIGNED_IN' && !booted) setTimeout(() => { if (!unlocking) boot(); }, 0);
+});
+
+window.Live = { save, remove, records, sb, me: () => me, reload: loadAll };
+boot();
+</script>
+<!-- ============ END LIVE LAYER ============ -->
+</body>
+</html>
