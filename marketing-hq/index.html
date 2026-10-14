@@ -605,12 +605,15 @@ main { flex: 1; min-height: 0; position: relative; }
 }
 .act > * { min-width: 0; }
 .act-main { overflow: auto; min-height: 0; scroll-snap-type: x proximity; }
-.act-cols { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(212px, 1fr); align-items: stretch; }
-.col { scroll-snap-align: start; }
+/* the board: one lane per channel (TL;DR tile, sticky header, cards). Lanes in a row share a
+   subgrid, so tiles and headers line up even when the TL;DRs differ in length. */
+.lane-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(212px, 1fr); grid-template-rows: auto auto 1fr; }
+.board.two .lane-row { grid-template-columns: repeat(var(--per), minmax(0, 1fr)); grid-auto-columns: minmax(0, 1fr); }
+.board.two .lane-row + .lane-row { border-top: 1px solid var(--line-3); }
+.lane { grid-row: span 3; display: grid; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); min-width: 0; border-right: 1px solid var(--line); scroll-snap-align: start; }
 
-/* status band: one TL;DR tile per channel, aligned over its column */
-.status-band { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(212px, 1fr); border-bottom: 1px solid var(--line-2); background: var(--s1); }
-.st-tile { border-right: 1px solid var(--line); padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; scroll-snap-align: start; }
+/* TL;DR tile at the top of each lane */
+.st-tile { background: var(--s1); border-bottom: 1px solid var(--line-2); padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .st-tile header { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; row-gap: 8px; }
 .st-tile header .chdot { width: 9px; height: 9px; border-radius: 3px; }
 .st-tile h2 { margin: 0; font-family: var(--f-display); font-weight: 360; font-size: 19px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; padding-top: 2px; }
@@ -641,7 +644,6 @@ main { flex: 1; min-height: 0; position: relative; }
 .st-tile footer b.a { color: var(--amber-ink); }
 .st-tile footer .stale { color: var(--amber-ink); }
 .tab .tab-short { display: none; }
-.col { border-right: 1px solid var(--line); min-height: 100%; display: flex; flex-direction: column; }
 .col-h { position: sticky; top: 0; z-index: 3; background: var(--bg); padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--line); }
 .col-h .top-row { flex-wrap: nowrap; }
 .col-h .col-name, .col-h .col-n { white-space: nowrap; }
@@ -659,6 +661,44 @@ main { flex: 1; min-height: 0; position: relative; }
 .col-h .headline { margin-top: 10px; font-size: 12px; line-height: 1.45; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 4.35em; }
 .col-h .headline .lbl { color: var(--ink); margin-right: 4px; }
 .col-b { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.col-b > .grp { margin: 6px 2px 0; display: flex; align-items: baseline; gap: 8px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+.col-b > .grp:first-child { margin-top: 2px; }
+.col-b > .grp b { font-weight: 400; color: var(--ink-4); }
+.col-b > .grp::after { content: ''; flex: 1; height: 1px; background: var(--line); transform: translateY(-3px); }
+.lane-more { align-self: stretch; height: 32px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--r); border: 1px dashed var(--line-2); font: 400 10px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); transition: color 140ms, border-color 140ms; }
+.lane-more:hover { color: var(--ink); border-color: var(--line-3); }
+.lane-more .i { width: 12px; height: 12px; }
+
+/* ideas: the "maybe" pile at the foot of a lane. Not tasks, so no status, owner or due date. */
+.ideas-sec { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line-2); display: flex; flex-direction: column; gap: 8px; }
+.ideas-h { display: flex; align-items: center; gap: 7px; padding: 0 2px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); text-align: left; }
+.ideas-h > .i:first-child { width: 13px; height: 13px; color: var(--ch); }
+.ideas-h b { font-weight: 400; color: var(--ink-4); }
+.ideas-h > .i:last-child { margin-left: auto; color: var(--ink-3); width: 12px; height: 12px; }
+.ideas-h:hover > .i:last-child { color: var(--ink); }
+.ideas-list { display: flex; flex-direction: column; gap: 6px; }
+.idea-card { position: relative; border: 1px dashed var(--line-3); border-radius: var(--r-lg); transition: border-color 160ms, background-color 160ms; }
+.idea-card:hover, .idea-card[open] { border-color: var(--ink-4); background: var(--s1); }
+.idea-card summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; row-gap: 4px; padding: 9px 10px 9px 12px; }
+.idea-card summary::-webkit-details-marker { display: none; }
+.idea-card summary > .i { grid-column: 2; grid-row: 1 / span 2; width: 12px; height: 12px; color: var(--ink-3); transition: transform 200ms var(--ease); }
+.idea-card[open] summary > .i { transform: rotate(180deg); }
+.idea-card .it { grid-column: 1; font-family: var(--f-display); font-weight: 360; font-size: 15px; line-height: 1.05; letter-spacing: 0.01em; text-transform: uppercase; color: var(--ink); padding-top: 2px; }
+.idea-card .iw { grid-column: 1; display: flex; align-items: center; gap: 5px; font: 400 9.5px/1.2 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.idea-card .iw .i { width: 11px; height: 11px; flex: none; }
+.idea-card .ib { padding: 0 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+.idea-card .id { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ink-2); }
+.idea-card .if { display: flex; align-items: center; gap: 6px; min-height: 22px; }
+.idea-card .if .open-src { font-size: 11.5px; }
+.idea-card .acts { margin-left: auto; opacity: 0; transition: opacity 160ms; }
+.idea-card:hover .acts, .idea-card:focus-within .acts { opacity: 1; }
+@media (hover: none) { .idea-card .acts { opacity: 1; } }
+.idea-card.arrived { animation: arrive 1.1s var(--ease); }
+.kind-seg { align-self: flex-start; }
+.kind-seg label { height: 24px; padding: 0 11px; border-radius: 999px; display: inline-flex; align-items: center; cursor: pointer; font: 400 10.5px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.kind-seg label:has(input:checked) { background: var(--s3); color: var(--ink); }
+.kind-seg label:has(input:focus-visible) { outline: 2px solid var(--ink-3); outline-offset: 1px; }
+.kind-seg input { position: absolute; opacity: 0; width: 0; height: 0; }
 .col-empty { padding: 18px 10px; color: var(--ink-3); font-size: 12px; line-height: 1.5; text-align: center; border: 1px dashed var(--line-2); border-radius: var(--r); }
 .card {
   border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--s1);
@@ -1152,8 +1192,10 @@ img.broken { visibility: hidden; }
   .q-list { overflow: visible; flex-direction: row; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 14px; }
   .q-card { min-width: 0; flex: 0 0 min(86%, 360px); scroll-snap-align: start; }
   .act-main { overflow-x: auto; overflow-y: visible; }
-  .act-cols, .status-band { grid-auto-columns: 86vw; }
-  .col { scroll-snap-align: start; }
+  .board { display: grid; grid-auto-flow: column; grid-auto-columns: 86vw; grid-template-rows: auto auto 1fr; }
+  .board .lane-row { display: contents; }
+  .lane { border-right: 1px solid var(--line) !important; }
+  .rows-seg { display: none; }
   .todo-list { padding: 14px 16px 12px; width: 100vw; }
   .todo-cols { grid-template-columns: 1fr; gap: 14px; }
   .td-col h3 .hint { display: none; }
@@ -1396,8 +1438,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     <div class="act">
       <div class="act-main" id="act-main">
         <section class="todo-list" id="todo" aria-label="Your to-do list" hidden></section>
-        <section class="status-band" id="status-band" aria-label="Channel status"></section>
-        <div class="act-cols" id="cols"></div>
+        <div class="board" id="cols"></div>
       </div>
       <aside class="queue" id="queue" aria-label="Flagged by Claude"></aside>
     </div>
@@ -1426,7 +1467,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   // LIVE = the published page (live.js): data and shared edits come from Supabase, and access from the user list.
   const LIVE = window.HQ_LIVE || null;
   const SHELL = (() => { const b = document.body.cloneNode(true); b.querySelectorAll('script').forEach(n => n.remove()); return b.innerHTML; })();
-  const TEAM_FIELDS = ['id', 'cat', 'kind', 'status', 'title', 'detail', 'impact', 'owner', 'wait', 'due', 'links', 'oldDate', 'newDate', 'date'];
+  const TEAM_FIELDS = ['id', 'cat', 'kind', 'group', 'status', 'title', 'detail', 'impact', 'owner', 'wait', 'due', 'links', 'where', 'site', 'oldDate', 'newDate', 'date'];
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1464,6 +1505,8 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     alert: '<path d="M8 3v6.2"/><circle cx="8" cy="12.3" r=".6" fill="currentColor"/>',
     clock: '<circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3"/>',
     chevD: '<path d="M4 6l4 4 4-4"/>',
+    chevU: '<path d="M4 10l4-4 4 4"/>',
+    pin: '<path d="M8 14s4.5-4.2 4.5-7.6a4.5 4.5 0 0 0-9 0C3.5 9.8 8 14 8 14Z"/><circle cx="8" cy="6.4" r="1.6"/>',
     chevL: '<path d="M10 4 6 8l4 4"/>',
     chevR: '<path d="M6 4l4 4-4 4"/>',
     plus: '<path d="M8 3.5v9M3.5 8h9"/>',
@@ -1545,6 +1588,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     actFilter: 'open',
     queueOpen: store.get('queueOpen', window.innerWidth >= 1680),
     todoOpen: store.get('todoOpen', true),
+    actRows: store.get('actRows', 2),
+    lanesOpen: new Set(),
+    ideasShut: store.get('ideasShut', {}),
     todoAll: false,
     openCards: new Set(),
     flash: null,
@@ -1574,7 +1620,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     const push = (a, origin) => {
       if (seen.has(a.id)) return; seen.add(a.id);
       const e = S.actEdits[a.id] || {};
-      if (e.removed) return;
+      if (e.removed || a.removed) return;
       const decision = origin === 'queue' ? S.decisions[a.id] || 'pending' : 'approved';
       const item = { ...a, ...e, cat: S.catEdits[a.id] || e.cat || a.cat, vis: S.visEdits[a.id] || a.vis || 'team', origin, state: decision };
       if (decision === 'completed') item.status = 'done';
@@ -2124,6 +2170,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       <h1>Activity</h1>
       ${searchBox('q-activity')}
       <div class="seg" role="group" aria-label="Show"><button data-actf="open" aria-pressed="${f2 === 'open'}">Open</button><button data-actf="blocked" aria-pressed="${f2 === 'blocked'}">Blocked</button><button data-actf="waiting" aria-pressed="${f2 === 'waiting'}">Waiting</button><button data-actf="all" aria-pressed="${f2 === 'all'}">All</button></div>
+      <div class="seg rows-seg" role="group" aria-label="Board layout"><button data-rows="1" aria-pressed="${S.actRows === 1}" title="All channels side by side">1 row</button><button data-rows="2" aria-pressed="${S.actRows === 2}" title="Channels in two rows, wider columns">2 rows</button></div>
       <span class="grow"></span>
       <button class="icon-btn" data-export>${ic('download')}Export</button>`;
   }
@@ -2183,7 +2230,8 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 
   function addForm(c) {
     return `<form class="add-form" data-add-form="${c.id}">
-      <input name="title" placeholder="What needs to happen?" required aria-label="Title">
+      <div class="seg kind-seg" role="radiogroup" aria-label="Type"><label><input type="radio" name="kind" value="action" checked>Action</label><label><input type="radio" name="kind" value="idea">Idea</label></div>
+      <input name="title" placeholder="What needs to happen? Or the idea's name" required aria-label="Title">
       <div class="r"><select name="status" aria-label="Status">${Object.keys(STATUS_LABEL).filter(s => s !== 'done').map(s => `<option value="${s}" ${s === 'todo' ? 'selected' : ''}>${STATUS_LABEL[s]}</option>`).join('')}</select><input name="due" type="date" aria-label="Due date"></div>
       <div class="r"><input name="owner" placeholder="Owner" aria-label="Owner" value="Zoe"><input name="wait" placeholder="Waiting on" aria-label="Waiting on"></div>
       <select name="vis" aria-label="Who can see it"><option value="team">Visible to the team</option><option value="private">Only me</option></select>
@@ -2192,20 +2240,58 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     </form>`;
   }
 
+  // Two rows: each column shows its first LANE_LIMIT cards, so the second row stays in reach.
+  const LANE_LIMIT = 5;
+  function ideaHtml(a) {
+    const link = a.site && a.site.url ? `<a class="open-src" href="${esc(a.site.url)}" target="_blank" rel="noopener">${esc(a.site.t || 'Website')} ${ic('link')}</a>` : '';
+    return `<details class="idea-card" data-act="${a.id}" data-more="${a.id}"${S.openCards.has(a.id) ? ' open' : ''}>
+      <summary><span class="it">${esc(a.title)}</span>${a.where ? `<span class="iw">${ic('pin', 'sm')}${esc(a.where)}</span>` : ''}${ic('chevD', 'sm')}</summary>
+      <div class="ib">${a.detail ? `<p class="id">${esc(a.detail)}</p>` : ''}${link || PRIV() ? `<div class="if">${link}${PRIV() ? `<div class="acts"><button class="mini" data-remove="${a.id}" aria-label="Remove idea" title="Remove">${ic('x')}</button></div>` : ''}</div>` : ''}</div>
+    </details>`;
+  }
+  function laneHtml(c, approved, two) {
+    const all = approved.filter(a => a.cat === c.id);
+    const ideas = all.filter(isIdea).filter(qMatch);
+    const acts = all.filter(a => !isIdea(a));
+    const groups = [...new Set(acts.map(a => a.group).filter(Boolean))];
+    const gi = a => a.group ? groups.indexOf(a.group) : groups.length;
+    const list = acts.filter(actMatches).sort((a, b) => gi(a) - gi(b) || STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || (dn(a.due) ?? 1e9) - (dn(b.due) ?? 1e9));
+    const capped = two && !S.lanesOpen.has(c.id) && list.length > LANE_LIMIT + 1;
+    const shown = capped ? list.slice(0, LANE_LIMIT) : list;
+    let cards = '', last;
+    shown.forEach(a => {
+      const g = groups.length ? a.group || 'Other' : null;
+      if (g && g !== last) { cards += `<h3 class="grp">${esc(g)}<b>${list.filter(x => (x.group || 'Other') === g).length}</b></h3>`; last = g; }
+      cards += cardHtml(a);
+    });
+    const more = capped ? `<button class="lane-more" data-lane-more="${c.id}">${ic('chevD', 'sm')}Show ${list.length - LANE_LIMIT} more</button>`
+      : two && list.length > LANE_LIMIT + 1 ? `<button class="lane-more" data-lane-more="${c.id}">${ic('chevU', 'sm')}Show fewer</button>` : '';
+    const showIdeas = ideas.length && S.actFilter !== 'blocked' && S.actFilter !== 'waiting' && S.focus !== 'waiting';
+    const shut = !!S.ideasShut[c.id];
+    const ideasBlock = showIdeas ? `<section class="ideas-sec ${shut ? 'shut' : ''}" data-ch="${c.id}" aria-label="${esc(c.name)} ideas">
+        <button class="ideas-h" data-ideas-toggle="${c.id}" aria-expanded="${!shut}">${ic('bulb', 'sm')}<span>Ideas</span><b>${ideas.length}</b>${ic(shut ? 'chevR' : 'chevD', 'sm')}</button>
+        ${shut ? '' : `<div class="ideas-list">${ideas.map(ideaHtml).join('')}</div>`}
+      </section>` : '';
+    const empty = !list.length ? `<div class="col-empty">${acts.length ? 'Nothing matches this filter.' : PRIV() ? 'Nothing here yet. Approve flagged items from the queue, or add one with +.' : 'Nothing logged yet.'}</div>` : '';
+    return `<section class="col lane" data-col="${c.id}" aria-label="${esc(c.name)}">
+      ${tileHtml(c, approved)}
+      <div class="col-h" data-ch="${c.id}">
+        <div class="top-row"><span class="chdot"></span><span class="col-name">${esc(c.name)}</span><span class="col-n">${list.length} ${S.actFilter === 'all' ? 'cards' : S.actFilter}</span>${CAN_EDIT() ? `<button class="add" data-add="${c.id}" aria-label="Add to ${esc(c.name)}" title="Add an action or idea">${ic('plus')}</button>` : ''}</div>
+      </div>
+      <div class="col-b">${S.addingIn === c.id && CAN_EDIT() ? addForm(c) : ''}${cards}${empty}${more}${ideasBlock}</div>
+    </section>`;
+  }
   function renderActivity() {
     renderActivityToolbar();
     const approved = ACTS.filter(a => a.state === 'approved' || a.state === 'completed');
-    $('#cols').innerHTML = DATA.channels.map(c => {
-      const all = approved.filter(a => a.cat === c.id);
-      const list = all.filter(actMatches).sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || (dn(a.due) ?? 1e9) - (dn(b.due) ?? 1e9));
-      return `<section class="col" data-col="${c.id}" aria-label="${esc(c.name)}">
-        <div class="col-h" data-ch="${c.id}">
-          <div class="top-row"><span class="chdot"></span><span class="col-name">${esc(c.name)}</span><span class="col-n">${list.length} ${S.actFilter === 'all' ? 'cards' : S.actFilter}</span>${CAN_EDIT() ? `<button class="add" data-add="${c.id}" aria-label="Add to ${esc(c.name)}" title="Add item">${ic('plus')}</button>` : ''}</div>
-        </div>
-        <div class="col-b">${S.addingIn === c.id && CAN_EDIT() ? addForm(c) : ''}${list.map(cardHtml).join('') || `<div class="col-empty">${all.length ? 'Nothing matches this filter.' : PRIV() ? 'Nothing here yet. Approve flagged items from the queue, or add one with +.' : 'Nothing logged yet.'}</div>`}</div>
-      </section>`;
-    }).join('');
-    renderStatusBand(approved);
+    const two = S.actRows === 2;
+    const chs = DATA.channels;
+    const per = two ? Math.ceil(chs.length / 2) : chs.length;
+    const rows = two ? [chs.slice(0, per), chs.slice(per)] : [chs];
+    const board = $('#cols');
+    board.className = `board ${two ? 'two' : 'one'}`;
+    board.style.setProperty('--per', per);
+    board.innerHTML = rows.filter(r => r.length).map(r => `<div class="lane-row">${r.map(c => laneHtml(c, approved, two)).join('')}</div>`).join('');
     renderTodo();
     $('.act').classList.toggle('q-closed', !S.queueOpen);
     $('.act').classList.toggle('no-queue', !PRIV());
@@ -2214,13 +2300,14 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   }
 
   // ── Your to-do list (Private view only): every open item you own, across all channels ──
+  const isIdea = a => a.kind === 'idea';
   const isMine = a => /\b(zoe|atlas)\b/i.test(a.owner || '') || (a.origin === 'manual' && !a.owner);
   const chasing = a => (a.status === 'waiting' || a.status === 'blocked') && !!a.wait;
   function renderTodo() {
     const el = $('#todo');
     if (!PRIV()) { el.hidden = true; el.innerHTML = ''; return; }
     el.hidden = false;
-    const mine = ACTS.filter(a => a.state === 'approved' && a.status !== 'done' && isMine(a) && qMatch(a));
+    const mine = ACTS.filter(a => a.state === 'approved' && a.status !== 'done' && !isIdea(a) && isMine(a) && qMatch(a));
     const key = a => { const d = dn(a.due); return [d != null && d < TODAY ? 0 : 1, d ?? 1e9, STATUS_ORDER[a.status]]; };
     const by = (x, y) => { const a = key(x), b = key(y); return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; };
     const doNow = mine.filter(a => !chasing(a)).sort(by);
@@ -2255,16 +2342,16 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   }
   function jumpTo(id) {
     let card = $(`#cols [data-act="${id}"]`);
-    if (!card) { S.actFilter = 'open'; S.q = ''; renderActivity(); card = $(`#cols [data-act="${id}"]`); }
+    if (!card) { const a = ACTS.find(x => x.id === id); if (a) S.lanesOpen.add(a.cat); S.actFilter = 'open'; S.q = ''; renderActivity(); card = $(`#cols [data-act="${id}"]`); }
     if (!card) return;
     card.scrollIntoView({ block: 'center', inline: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     card.classList.remove('arrived'); void card.offsetWidth; card.classList.add('arrived');
   }
 
-  // ── Channel status: the TL;DR band above the columns ─────────────────
+  // ── Channel status: the TL;DR tile at the top of each column ─────────
   const shortWho = w => String(w || '').split(/[(·/,]/)[0].replace(/^(Waiting on|Owner)\s+/i, '').trim();
   function channelStatus(ch, approved) {
-    const open = approved.filter(a => a.cat === ch && a.status !== 'done');
+    const open = approved.filter(a => a.cat === ch && a.status !== 'done' && !isIdea(a));
     const blocked = open.filter(a => a.status === 'blocked');
     const waiting = open.filter(a => a.status === 'waiting');
     const content = Object.values(R).filter(r => r.ch === ch && r.a.state !== 'live');
@@ -2283,8 +2370,8 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     return { state, open, blocked, waiting, people, next: next[0] };
   }
   const STATE_BADGE = { blocked: ['Blocked', 'alert'], attention: ['Needs attention', 'clock'], ok: ['On track', 'check'] };
-  function renderStatusBand(approved) {
-    $('#status-band').innerHTML = DATA.channels.map(c => {
+  function tileHtml(c, approved) {
+    {
       const st = channelStatus(c.id, approved);
       const t = { ...((DATA.status || {})[c.id] || {}), ...(S.tldr[c.id] || {}) };
       const upd = dn(t.updated);
@@ -2307,7 +2394,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
         ${facts ? `<dl class="st-facts">${facts}</dl>` : ''}
         <footer><span>${st.open.length} open${st.blocked.length ? ` · <b class="r">${st.blocked.length} blocked</b>` : ''}${st.waiting.length ? ` · <b class="a">${st.waiting.length} waiting</b>` : ''}</span><span class="${stale ? 'stale' : ''}">${upd != null ? `Updated ${f(upd)}${stale ? ' · may be stale' : ''}` : ''}</span></footer>
       </article>`;
-    }).join('');
+    }
   }
 
   // ── Flagged by Claude: the approval queue (Private view only) ─────────
@@ -2845,6 +2932,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if ((el = t.closest('[data-deny]'))) return deny(el.dataset.deny);
     if (t.closest('[data-queue-toggle]')) { S.queueOpen = !S.queueOpen; save('queueOpen'); return renderActivity(); }
     if (t.closest('[data-toggle-denied]')) { showDenied = !showDenied; return renderQueue(); }
+    if ((el = t.closest('[data-rows]'))) { S.actRows = +el.dataset.rows; save('actRows'); S.lanesOpen.clear(); return renderActivity(); }
+    if ((el = t.closest('[data-lane-more]'))) { const id = el.dataset.laneMore; S.lanesOpen.has(id) ? S.lanesOpen.delete(id) : S.lanesOpen.add(id); renderActivity(); if (!S.lanesOpen.has(id)) $(`[data-col="${id}"]`).scrollIntoView({ block: 'nearest' }); return; }
+    if ((el = t.closest('[data-ideas-toggle]'))) { const id = el.dataset.ideasToggle; S.ideasShut[id] = !S.ideasShut[id]; save('ideasShut'); return renderActivity(); }
     if (t.closest('[data-todo-toggle]')) { S.todoOpen = !S.todoOpen; save('todoOpen'); return renderTodo(); }
     if (t.closest('[data-todo-all]')) { S.todoAll = !S.todoAll; return renderTodo(); }
     if ((el = t.closest('[data-jump]'))) return jumpTo(el.dataset.jump);
@@ -2937,7 +3027,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     e.preventDefault();
     const fd = new FormData(form);
     const item = {
-      id: 'm-' + Date.now().toString(36), cat: form.dataset.addForm, kind: 'action',
+      id: 'm-' + Date.now().toString(36), cat: form.dataset.addForm, kind: fd.get('kind') === 'idea' ? 'idea' : 'action',
       title: fd.get('title').trim(), status: fd.get('status'), owner: fd.get('owner').trim() || 'Zoe',
       wait: fd.get('wait').trim() || null, due: fd.get('due') || null, links: fd.get('link') ? [fd.get('link')] : [], vis: fd.get('vis') || 'team', date: ds(TODAY),
       src: { type: 'manual', ref: 'Added in Marketing HQ', date: ds(TODAY) }
