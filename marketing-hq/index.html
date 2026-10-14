@@ -52,6 +52,7 @@
   --c-email: #d55181;
   --c-organic: #9085e9;
   --c-web: #008300;
+  --c-ooh: #00a3b5;   /* validated last in the order: adjacent CVD ΔE 13.2 dark, 16.3 light */
 
   --shadow-pop: 0 18px 50px -12px rgba(0, 0, 0, 0.75), 0 2px 8px rgba(0, 0, 0, 0.5);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -92,6 +93,7 @@
   --c-email: #e87ba4;
   --c-organic: #4a3aa7;
   --c-web: #008300;
+  --c-ooh: #00a3b5;
   --shadow-pop: 0 18px 50px -14px rgba(40, 30, 20, 0.28), 0 2px 8px rgba(40, 30, 20, 0.1);
 }
 
@@ -107,7 +109,7 @@
     --good: #2f8f5c; --good-ink: #1f7046;
     --bar-ok: rgba(10, 9, 9, 0.7); --bar-live: #b9b5b0;
     --orb-glow: 0 0 0 1px rgba(10, 9, 9, 0.85), 0 0 10px rgba(10, 9, 9, 0.18);
-    --c-press: #1baf7a; --c-events: #2a78d6; --c-paid: #eda100; --c-email: #e87ba4; --c-organic: #4a3aa7; --c-web: #008300;
+    --c-press: #1baf7a; --c-events: #2a78d6; --c-paid: #eda100; --c-email: #e87ba4; --c-organic: #4a3aa7; --c-web: #008300; --c-ooh: #00a3b5;
     --shadow-pop: 0 18px 50px -14px rgba(40, 30, 20, 0.28), 0 2px 8px rgba(40, 30, 20, 0.1);
   }
 }
@@ -312,6 +314,7 @@ main { flex: 1; min-height: 0; position: relative; }
 [data-ch="email"] { --ch: var(--c-email); }
 [data-ch="organic"] { --ch: var(--c-organic); }
 [data-ch="web"] { --ch: var(--c-web); }
+[data-ch="ooh"] { --ch: var(--c-ooh); }
 .sw, .chdot { background: var(--ch, var(--ink-3)); }
 .chdot { width: 7px; height: 7px; border-radius: 2px; flex: none; display: inline-block; }
 
@@ -593,122 +596,70 @@ main { flex: 1; min-height: 0; position: relative; }
 .cw-cell { border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 8px; min-height: 86px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .cw-cell.we { background: var(--weekend); }
 
-/* ── Activity: briefing list ──────────────────────────────────────────── */
-.briefing { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid var(--line); }
-.bl-row { border-bottom: 1px solid var(--line); }
-.bl-row.is-open { background: var(--s1); }
-.bl-head { display: grid; grid-template-columns: 18px 200px minmax(0, 1fr) 300px 132px; align-items: start; gap: 18px; padding: 18px 24px 18px 20px; cursor: pointer; transition: background-color 160ms; }
-.bl-head:hover { background: color-mix(in srgb, var(--s1) 70%, transparent); }
-.bl-row.is-open .bl-head:hover { background: var(--s2); }
-.bl-head .chev { color: var(--ink-3); padding-top: 2px; }
-.bl-name { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.bl-name h3 { margin: 0; font-family: var(--f-display); font-weight: 360; font-size: 19px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; padding-top: 2px; }
-.state-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px var(--line-3); }
-.state-dot.blocked { background: var(--red); box-shadow: none; }
-.state-dot.attention { background: var(--amber); box-shadow: none; }
-.state-dot.ok { background: var(--good); box-shadow: none; }
-.bl-tldr { margin: 0; font-size: 14px; line-height: 1.5; color: var(--ink); position: relative; padding-right: 26px; max-width: 72ch; }
-.bl-tldr .empty { color: var(--ink-3); }
-.bl-tldr .stale { display: block; margin-top: 4px; font: 400 9.5px/1.3 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--amber-ink); }
-.tldr-edit { position: absolute; top: -4px; right: 0; opacity: 0; }
-.bl-head:hover .tldr-edit, .tldr-edit:focus-visible { opacity: 1; }
+/* ── Activity ─────────────────────────────────────────────────────────── */
+.act { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 372px; border-top: 1px solid var(--line); transition: grid-template-columns 260ms var(--ease); }
+.act.q-closed { grid-template-columns: minmax(0, 1fr) 54px; }
+@media (min-width: 921px) and (max-width: 1679px) {
+  .act { position: relative; grid-template-columns: minmax(0, 1fr) 54px; }
+  .queue:not(.closed) { position: absolute; top: 0; right: 0; bottom: 0; width: 380px; z-index: 20; box-shadow: var(--shadow-pop); }
+}
+.act > * { min-width: 0; }
+.act-main { overflow: auto; min-height: 0; scroll-snap-type: x proximity; }
+.act-cols { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(212px, 1fr); align-items: stretch; }
+.col { scroll-snap-align: start; }
+
+/* status band: one TL;DR tile per channel, aligned over its column */
+.status-band { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(212px, 1fr); border-bottom: 1px solid var(--line-2); background: var(--s1); }
+.st-tile { border-right: 1px solid var(--line); padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; scroll-snap-align: start; }
+.st-tile header { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; row-gap: 8px; }
+.st-tile header .chdot { width: 9px; height: 9px; border-radius: 3px; }
+.st-tile h2 { margin: 0; font-family: var(--f-display); font-weight: 360; font-size: 19px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; padding-top: 2px; }
+.st-badge { align-self: flex-start; margin-top: -2px; display: inline-flex; align-items: center; gap: 5px; height: 20px; padding: 0 8px; border-radius: 999px; font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; border: 1px solid var(--line-2); color: var(--ink-2); }
+.st-badge .i { width: 11px; height: 11px; stroke-width: 1.7; }
+.st-badge.blocked { background: var(--red); border-color: var(--red); color: #fff; }
+.st-badge.attention { color: var(--amber-ink); border-color: color-mix(in srgb, var(--amber) 70%, transparent); background: var(--amber-wash); }
+.st-badge.ok { color: var(--good-ink); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.tldr { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink); position: relative; padding-right: 22px; }
+.tldr .empty { color: var(--ink-3); }
+.tldr-edit { position: absolute; top: -3px; right: -6px; opacity: 0; }
+.st-tile:hover .tldr-edit, .tldr-edit:focus-visible { opacity: 1; }
 @media (hover: none) { .tldr-edit { opacity: 1; } }
-.bl-meta { margin: 0; display: flex; flex-direction: column; gap: 6px; padding-top: 1px; }
-.bl-meta > div { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; align-items: baseline; }
-.bl-meta dt { font: 400 9.5px/1.4 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
-.bl-meta dd { margin: 0; font-size: 12.5px; line-height: 1.4; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.bl-meta > div > * { min-width: 0; }
-.bl-meta dd .mono { font-size: 11px; color: var(--ink); }
-.bl-n { justify-self: end; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); padding-top: 3px; }
-.new-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 7px; border-radius: 999px; background: var(--ink); color: var(--bg); }
-.new-pill .i { width: 11px; height: 11px; }
-.bl-body { padding: 0 24px 18px 76px; display: flex; flex-direction: column; }
-.tldr-form { display: flex; flex-direction: column; gap: 8px; max-width: 760px; padding: 0 0 14px 218px; }
-.tldr-form textarea { width: 100%; resize: vertical; min-height: 84px; border-radius: 6px; border: 1px solid var(--line-3); background: var(--bg); color: var(--ink); padding: 8px 10px; font: 400 13.5px/1.5 var(--f-body); outline: none; }
+.tldr-form { display: flex; flex-direction: column; gap: 8px; }
+.tldr-form textarea { width: 100%; resize: vertical; min-height: 92px; border-radius: 6px; border: 1px solid var(--line-3); background: var(--bg); color: var(--ink); padding: 8px 10px; font: 400 13px/1.5 var(--f-body); outline: none; }
 .tldr-form textarea:focus { border-color: var(--ink-3); }
 .tldr-form select { height: 30px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 0 8px; font: 400 12px/1 var(--f-body); }
 .tldr-form .r { display: flex; gap: 6px; }
-.tldr-form .r .btn { flex: none; padding: 0 14px; }
-.st-ic { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; flex: none; }
-.st-ic .i { width: 11px; height: 11px; stroke-width: 2; }
-.blocked > .st-ic { background: var(--red); color: #fff; }
-.waiting > .st-ic { background: var(--amber-wash); color: var(--amber-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--amber) 70%, transparent); }
-.in_progress > .st-ic { box-shadow: inset 0 0 0 1px var(--line-3); color: var(--ink); }
-.todo > .st-ic { box-shadow: inset 0 0 0 1px var(--line-2); color: var(--ink-3); }
-.done > .st-ic { color: var(--good-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--good) 45%, transparent); }
-.bl-item { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto auto 14px; gap: 12px; align-items: center; padding: 9px 10px; border-top: 1px solid var(--line); font-size: 13px; cursor: pointer; border-radius: 0; transition: background-color 140ms; }
-.bl-item:hover { background: var(--s2); }
-.bl-item.open { background: var(--s2); border-radius: 8px 8px 0 0; border-top-color: transparent; }
-.bl-item.done .bl-t { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--line-3); }
-.bl-item.flash { animation: arrive 1100ms var(--ease); }
-@keyframes arrive { 0% { background: var(--s3); box-shadow: inset 0 0 0 1px var(--ink); } 100% { box-shadow: inset 0 0 0 1px transparent; } }
-.bl-t { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; text-align: left; }
-.bl-who { font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
-.bl-who.overdue { color: var(--red-ink); }
-.bl-src { display: inline-flex; align-items: center; gap: 4px; color: var(--ink-3); }
-.bl-src .i { width: 13px; height: 13px; }
-.bl-item .chev-s, .nw-row .chev-s { color: var(--ink-3); display: inline-flex; }
-.bl-detail { background: var(--s2); border-radius: 0 0 8px 8px; padding: 2px 12px 14px 40px; display: flex; flex-direction: column; gap: 9px; margin-bottom: 6px; }
-.bl-detail .row1 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.bl-detail .cd { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-2); max-width: 80ch; }
-.bl-detail .who { display: flex; gap: 14px; flex-wrap: wrap; font: 400 10px/1.3 var(--f-mono); letter-spacing: 0.03em; color: var(--ink-3); text-transform: uppercase; }
-.bl-detail .who b { font-weight: 400; color: var(--ink-2); }
-.bl-detail .impact { font-size: 12.5px; color: var(--ink-2); display: flex; gap: 6px; line-height: 1.45; }
-.bl-detail .impact .i { width: 13px; height: 13px; color: var(--ink-3); margin-top: 2px; }
-.bl-detail .links { display: flex; gap: 14px; flex-wrap: wrap; }
-.linked { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink); text-align: left; }
-.linked .i { color: var(--ink-3); width: 12px; height: 12px; }
-.linked:hover span { text-decoration: underline; text-underline-offset: 3px; }
-.priv { border: 1px dashed var(--line-3); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 9px; }
-.priv-h { display: flex; align-items: center; gap: 6px; font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
-.priv-h .i { width: 11px; height: 11px; }
-.srcline { display: flex; align-items: center; gap: 8px; font: 400 10px/1.35 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
-.srcline .i { width: 12px; height: 12px; flex: none; }
-.srcline > span { flex: 1; min-width: 0; }
-.open-src { display: inline-flex; align-items: center; gap: 5px; flex: none; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-3); }
-.open-src:hover { text-decoration-color: var(--ink); }
-.open-src .i { width: 12px; height: 12px; }
-.own-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.own-acts .sp { flex: 1; }
-.btn.sm { flex: none; height: 26px; padding: 0 11px; font-size: 10px; }
-.btn.sm .i { width: 12px; height: 12px; }
-.bl-empty { padding: 12px 10px; color: var(--ink-3); font-size: 12.5px; border-top: 1px solid var(--line); }
-.bl-foot { display: flex; align-items: center; gap: 16px; padding-top: 10px; border-top: 1px solid var(--line); }
-.bl-foot button { display: inline-flex; align-items: center; gap: 6px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
-.bl-foot button:hover { color: var(--ink); }
-.bl-foot .i { width: 12px; height: 12px; }
-.bl-foot .done-ic { color: var(--good-ink); }
-.bl-doneList { display: flex; flex-direction: column; padding-top: 4px; }
-.nw { margin-top: 12px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--bg); padding: 10px 8px 8px; display: flex; flex-direction: column; gap: 2px; }
-.nw-h { display: flex; align-items: center; gap: 7px; font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink); padding: 2px 6px 8px; }
-.nw-h .i { width: 12px; height: 12px; }
-.nw-h .hint { margin-left: auto; color: var(--ink-3); text-transform: none; letter-spacing: 0; font: 400 11.5px/1.3 var(--f-body); }
-.nw-row { display: grid; grid-template-columns: 16px minmax(0, 1fr) 14px auto auto auto auto; gap: 10px; align-items: center; padding: 6px 6px; border-radius: 8px; font-size: 13px; }
-.nw-row:hover { background: var(--s1); }
-.nw-item.open .nw-row { background: var(--s2); border-radius: 8px 8px 0 0; }
-.nw-row .spark-s { color: var(--ink); display: inline-flex; }
-.nw-row .spark-s .i { width: 12px; height: 12px; }
-.nw-row .nw-t { cursor: pointer; }
-.nw-row .nw-t:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-3); }
-.nw-row .due { font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
-.nw-row .due.overdue { color: var(--red-ink); }
-.nw-item .bl-detail { margin-bottom: 4px; }
-.nw-move { display: flex; align-items: center; gap: 8px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
-.nw-move select { appearance: none; -webkit-appearance: none; height: 24px; padding: 0 22px 0 8px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--s1); font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink);
-  background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%), linear-gradient(135deg, var(--ink-3) 50%, transparent 50%); background-position: calc(100% - 11px) 10px, calc(100% - 7px) 10px; background-size: 4px 4px; background-repeat: no-repeat; }
-.bl-add { align-self: flex-start; margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
-.bl-add:hover { color: var(--ink); }
-.bl-add .i { width: 12px; height: 12px; }
-.bl-body .add-form { margin-top: 10px; max-width: 560px; }
+.st-facts { margin: 0; display: flex; flex-direction: column; gap: 7px; padding-top: 10px; border-top: 1px solid var(--line); }
+.st-facts > div { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.st-facts dt { font: 400 9.5px/1.3 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.st-facts dd { margin: 0; font-size: 12px; line-height: 1.4; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.st-facts dd .mono { font-size: 11px; color: var(--ink); }
+.st-facts .more-n { font: 400 10px/1 var(--f-mono); color: var(--ink-3); }
+.st-tile footer { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font: 400 9.5px/1.3 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.st-tile footer b { font-weight: 400; }
+.st-tile footer b.r { color: var(--red-ink); }
+.st-tile footer b.a { color: var(--amber-ink); }
+.st-tile footer .stale { color: var(--amber-ink); }
 .tab .tab-short { display: none; }
-/* four tabs on one bar: the live page also carries Settings and the account button, so give room in steps */
-@media (max-width: 1700px) and (min-width: 921px) { .tab .i { display: none; } .tab { padding: 0 14px; } }
-@media (max-width: 1440px) and (min-width: 921px) { .brand .name, .brand .rule { display: none; } }
-@media (max-width: 1320px) { .tab .tab-long { display: none; } .tab .tab-short { display: inline; } }
-@media (max-width: 1100px) and (min-width: 921px) { .whois button span, .owner-tools .icon-btn span, #btn-rules span { display: none; } .whois button { padding: 0 8px; } .owner-tools .icon-btn, #btn-rules { width: 32px; padding: 0; } }
-.dismissed-list { display: flex; flex-direction: column; gap: 4px; }
-.dismissed-list .dn-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); padding: 6px 8px; border-radius: 6px; background: var(--bg); }
-.dismissed-list .dn-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col { border-right: 1px solid var(--line); min-height: 100%; display: flex; flex-direction: column; }
+.col-h { position: sticky; top: 0; z-index: 3; background: var(--bg); padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--line); }
+.col-h .top-row { flex-wrap: nowrap; }
+.col-h .col-name, .col-h .col-n { white-space: nowrap; }
+.col-h .col-name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.col-h .col-name { font: 400 10.5px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); }
+.col-h .col-n { font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.col-h .top-row { display: flex; align-items: center; gap: 9px; }
+.col-h .chdot { width: 9px; height: 9px; border-radius: 3px; }
+.col-h h2 { margin: 0; font-family: var(--f-display); font-weight: 360; font-size: 19px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; padding-top: 2px; }
+.col-h .add { margin-left: auto; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: var(--ink-3); border: 1px solid var(--line-2); transition: color 160ms, border-color 160ms; }
+.col-h .add:hover { color: var(--ink); border-color: var(--line-3); }
+.col-h .counts { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; font: 400 10px/1 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); }
+.col-h .counts .c-red { color: var(--red-ink); }
+.col-h .counts .c-amber { color: var(--amber-ink); }
+.col-h .headline { margin-top: 10px; font-size: 12px; line-height: 1.45; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 4.35em; }
+.col-h .headline .lbl { color: var(--ink); margin-right: 4px; }
+.col-b { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.col-empty { padding: 18px 10px; color: var(--ink-3); font-size: 12px; line-height: 1.5; text-align: center; border: 1px dashed var(--line-2); border-radius: var(--r); }
 .card {
   border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--s1);
   padding: 12px 12px 10px; display: flex; flex-direction: column; gap: 8px;
@@ -761,7 +712,40 @@ details.more-d summary:hover { color: var(--ink); }
 details.more-d[open] summary .i { transform: rotate(180deg); }
 details.more-d .body { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
 
-/* buttons */
+/* queue */
+.queue { border-left: 1px solid var(--line-2); background: var(--s1); display: flex; flex-direction: column; min-height: 0; }
+.q-h { padding: 16px 18px 14px; border-bottom: 1px solid var(--line); }
+.q-h .tl { display: flex; align-items: center; gap: 10px; }
+.q-h .spark { color: var(--ink); }
+.q-h h2 { margin: 0; font-family: var(--f-display); font-weight: 360; font-size: 19px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; padding-top: 2px; }
+.q-h .n, .q-rail .n { margin-left: auto; font: 500 11px/1 var(--f-mono); background: var(--ink); color: var(--bg); border-radius: 999px; padding: 4px 8px; }
+.q-h .mini { margin-left: 4px; }
+.q-rail { display: none; }
+.queue.closed > :not(.q-rail) { display: none; }
+.queue.closed .q-rail { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; height: 100%; padding: 18px 0; color: var(--ink); transition: background-color 160ms; }
+.queue.closed .q-rail:hover { background: var(--s2); }
+.q-rail .n { margin: 0; }
+.q-rail .vt { writing-mode: vertical-rl; font-family: var(--f-display); font-weight: 360; font-size: 16px; letter-spacing: 0.04em; text-transform: uppercase; }
+.q-h p { margin: 10px 0 0; font-size: 12px; line-height: 1.45; color: var(--ink-2); }
+.scans { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.scan { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px 0 7px; border-radius: 999px; border: 1px solid var(--line-2); font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
+.scan .i { width: 12px; height: 12px; }
+.scan .ok { width: 5px; height: 5px; border-radius: 50%; background: var(--good); }
+.scan .pending { width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--ink-3); }
+.q-list { flex: 1; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.q-card { border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--bg); padding: 12px; display: flex; flex-direction: column; gap: 9px; transition: opacity 240ms var(--ease), transform 240ms var(--ease); }
+.q-card.leaving { opacity: 0; transform: translateX(16px); }
+.q-card .row1 { display: flex; align-items: center; gap: 8px; }
+.q-card select {
+  appearance: none; -webkit-appearance: none; height: 22px; padding: 0 22px 0 8px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--s2);
+  font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink);
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%), linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+  background-position: calc(100% - 11px) 9px, calc(100% - 7px) 9px; background-size: 4px 4px; background-repeat: no-repeat;
+}
+.q-card .conf { margin-left: auto; font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); }
+.q-card .ct { font-size: 13px; line-height: 1.35; font-weight: 450; }
+.q-card .cd { font-size: 12px; line-height: 1.45; color: var(--ink-2); }
+.q-acts { display: flex; gap: 6px; }
 .btn {
   flex: 1; height: 32px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   font: 400 10.5px/1 var(--f-mono); letter-spacing: 0.07em; text-transform: uppercase;
@@ -772,6 +756,18 @@ details.more-d .body { margin-top: 8px; display: flex; flex-direction: column; g
 .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .btn.primary:hover { background: color-mix(in srgb, var(--ink) 86%, var(--bg)); color: var(--bg); }
 .btn kbd { font: inherit; opacity: 0.55; }
+.q-empty { text-align: center; padding: 36px 16px; color: var(--ink-3); }
+.q-empty .disp { font-size: 18px; color: var(--ink-2); margin-bottom: 8px; }
+.q-foot { border-top: 1px solid var(--line); padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+.q-foot button { font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); display: inline-flex; align-items: center; gap: 6px; }
+.q-foot button:hover { color: var(--ink); }
+.denied-list { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.denied-list .dn-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--ink-3); padding: 6px 8px; border-radius: 6px; background: var(--bg); }
+.denied-list .dn-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: line-through; }
+
+.flyer { position: fixed; z-index: 80; pointer-events: none; border-radius: var(--r-lg); border: 1px solid var(--line-3); background: var(--s2); box-shadow: var(--shadow-pop); transition: transform 520ms var(--ease), opacity 520ms var(--ease), width 520ms var(--ease), height 520ms var(--ease); overflow: hidden; }
+.card.arrived { animation: arrive 900ms var(--ease); }
+@keyframes arrive { 0% { box-shadow: 0 0 0 1px var(--ink), 0 0 24px color-mix(in srgb, var(--ink) 35%, transparent); } 100% { box-shadow: 0 0 0 0 transparent; } }
 
 /* inline add form */
 .add-form { border: 1px solid var(--line-3); border-radius: var(--r-lg); background: var(--s1); padding: 10px; display: flex; flex-direction: column; gap: 8px; }
@@ -782,6 +778,93 @@ details.more-d .body { margin-top: 8px; display: flex; flex-direction: column; g
 .add-form input:focus, .add-form select:focus, .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--ink-3); }
 .add-form .r { display: flex; gap: 6px; }
 .add-form .r > * { flex: 1; }
+
+/* kept from later work */
+.state-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px var(--line-3); }
+.state-dot.blocked { background: var(--red); box-shadow: none; }
+.state-dot.attention { background: var(--amber); box-shadow: none; }
+.state-dot.ok { background: var(--good); box-shadow: none; }
+.tldr-form .r .btn { flex: none; padding: 0 14px; }
+.st-ic { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.st-ic .i { width: 11px; height: 11px; stroke-width: 2; }
+.blocked > .st-ic { background: var(--red); color: #fff; }
+.waiting > .st-ic { background: var(--amber-wash); color: var(--amber-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--amber) 70%, transparent); }
+.in_progress > .st-ic { box-shadow: inset 0 0 0 1px var(--line-3); color: var(--ink); }
+.todo > .st-ic { box-shadow: inset 0 0 0 1px var(--line-2); color: var(--ink-3); }
+.done > .st-ic { color: var(--good-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--good) 45%, transparent); }
+.linked { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink); text-align: left; }
+.linked .i { color: var(--ink-3); width: 12px; height: 12px; }
+.linked:hover span { text-decoration: underline; text-underline-offset: 3px; }
+.priv { border: 1px dashed var(--line-3); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 9px; }
+.priv-h { display: flex; align-items: center; gap: 6px; font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.priv-h .i { width: 11px; height: 11px; }
+.srcline { display: flex; align-items: center; gap: 8px; font: 400 10px/1.35 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2); }
+.srcline .i { width: 12px; height: 12px; flex: none; }
+.srcline > span { flex: 1; min-width: 0; }
+.open-src { display: inline-flex; align-items: center; gap: 5px; flex: none; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-3); }
+.open-src:hover { text-decoration-color: var(--ink); }
+.open-src .i { width: 12px; height: 12px; }
+.own-acts { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.own-acts .sp { flex: 1; }
+.btn.sm { flex: none; height: 26px; padding: 0 11px; font-size: 10px; }
+.btn.sm .i { width: 12px; height: 12px; }
+/* four tabs on one bar: the live page also carries Settings and the account button, so give room in steps */
+@media (max-width: 1700px) and (min-width: 921px) { .tab .i { display: none; } .tab { padding: 0 14px; } }
+@media (max-width: 1440px) and (min-width: 921px) { .brand .name, .brand .rule { display: none; } }
+@media (max-width: 1320px) { .tab .tab-long { display: none; } .tab .tab-short { display: inline; } }
+@media (max-width: 1100px) and (min-width: 921px) { .whois button span, .owner-tools .icon-btn span, #btn-rules span { display: none; } .whois button { padding: 0 8px; } .owner-tools .icon-btn, #btn-rules { width: 32px; padding: 0; } }
+.dismissed-list { display: flex; flex-direction: column; gap: 4px; }
+.dismissed-list .dn-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); padding: 6px 8px; border-radius: 6px; background: var(--bg); }
+.dismissed-list .dn-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* queue placement and visibility */
+.act.no-queue { grid-template-columns: minmax(0, 1fr) !important; }
+.act.no-queue .queue { display: none; }
+.q-vis { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 2px; }
+.q-acts .btn { padding: 0 8px; }
+
+/* card source link and the "Only you" box inside Context */
+.src-link { color: var(--ink-2); text-decoration: none; }
+.src-link:hover .r { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-3); }
+.card .priv { gap: 8px; padding: 9px 10px; }
+.pnote { font-size: 11.5px; line-height: 1.45; color: var(--ink-2); }
+.refs { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+.refs .open-src { font-size: 11.5px; }
+
+/* your to-do list (Private view): pinned left while the board scrolls sideways */
+.todo-list { position: sticky; left: 0; padding: 16px 20px 14px; border-bottom: 1px solid var(--line-2); background: var(--bg); }
+.todo-list[hidden] { display: none; }
+.todo-h { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.todo-toggle { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); }
+.todo-toggle .i { color: var(--ink-3); align-self: center; }
+.todo-toggle h2 { margin: 0; font-family: var(--f-display); font-weight: 360; font-size: 22px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; padding-top: 2px; }
+.todo-h .lbl b { font-weight: 400; }
+.todo-h .od { color: var(--red-ink); }
+.todo-h .only-you { margin-left: auto; }
+.todo-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 36px; margin-top: 14px; }
+.td-col h3 { margin: 0; display: flex; align-items: baseline; gap: 8px; padding-bottom: 8px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink); }
+.td-col h3 b { font-weight: 400; color: var(--ink-3); }
+.td-col h3 .hint { margin-left: auto; color: var(--ink-4); letter-spacing: 0.04em; }
+.td-col ul { margin: 0; padding: 0; list-style: none; }
+.td-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid var(--line); }
+.td-check { width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.25px var(--line-3); color: transparent; transition: color 140ms, box-shadow 140ms, background-color 140ms; }
+.td-check .i { width: 11px; height: 11px; stroke-width: 2; }
+.td-check:hover, .td-check:focus-visible { color: var(--good-ink); box-shadow: inset 0 0 0 1.25px var(--good); }
+.td-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.td-t { text-align: left; font-size: 13px; line-height: 1.35; color: var(--ink); }
+.td-t:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-3); }
+.td-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font: 400 9.5px/1.2 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.td-ch { display: inline-flex; align-items: center; gap: 5px; }
+.td-ch .chdot { width: 7px; height: 7px; border-radius: 2px; }
+.td-st { display: inline-flex; align-items: center; gap: 4px; }
+.td-st .i { width: 11px; height: 11px; }
+.td-st.waiting { color: var(--amber-ink); }
+.td-st.blocked { color: var(--red-ink); }
+.td-due { font: 400 10px/1.3 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; padding-top: 2px; }
+.td-due.overdue { color: var(--red-ink); }
+.td-empty { padding: 10px 0; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); }
+.td-more { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.td-more:hover { color: var(--ink); }
 
 /* ── Drawer ───────────────────────────────────────────────────────────── */
 .drawer {
@@ -1052,26 +1135,28 @@ img.broken { visibility: hidden; }
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 1180px) {
   .sync .txt { display: none; }
-  .bl-head { grid-template-columns: 18px 170px minmax(0, 1fr) 132px; }
-  .bl-head .bl-meta { grid-column: 3; grid-row: 2; }
-  .tldr-form { padding-left: 188px; }
+  .act { grid-template-columns: minmax(0, 1fr) 340px; }
 }
 @media (max-width: 920px) {
   .top { grid-template-columns: auto minmax(0, 1fr); height: auto; padding: 10px 16px; row-gap: 10px; }
   .top > * { min-width: 0; }
   .tabs { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; min-width: 0; }
   .tab { flex: 1 1 0; min-width: 0; justify-content: center; padding: 0 6px; }
-  .bl-head { grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px 12px; padding: 16px; }
-  .bl-head .bl-tldr { grid-column: 1 / -1; grid-row: 2; padding-right: 26px; }
-  .bl-head .bl-meta { grid-column: 1 / -1; grid-row: 3; }
-  .bl-body { padding: 0 12px 16px; }
-  .tldr-form { padding: 0 0 12px; }
-  .bl-item { grid-template-columns: 18px minmax(0, 1fr) auto 14px; }
-  .bl-item .bl-src { display: none; }
-  .bl-detail { padding-left: 14px; }
-  .nw-row { grid-template-columns: 16px minmax(0, 1fr) 14px; row-gap: 8px; }
-  .nw-row > .seg, .nw-row > .btn { grid-row: 2; }
-  .nw-row .nw-acts { grid-column: 1 / -1; }
+  .act-main { scroll-snap-type: x mandatory; }
+  .queue { order: -1; }
+  .queue.closed .q-rail { flex-direction: row; height: auto; padding: 12px 16px; justify-content: flex-start; }
+  .queue.closed .q-rail .vt { writing-mode: horizontal-tb; font-size: 15px; }
+  .act.q-closed { grid-template-columns: 1fr; }
+  .act { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow: auto; }
+  .queue { border-left: 0; border-bottom: 1px solid var(--line-2); max-height: none; }
+  .q-list { overflow: visible; flex-direction: row; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 14px; }
+  .q-card { min-width: 0; flex: 0 0 min(86%, 360px); scroll-snap-align: start; }
+  .act-main { overflow-x: auto; overflow-y: visible; }
+  .act-cols, .status-band { grid-auto-columns: 86vw; }
+  .col { scroll-snap-align: start; }
+  .todo-list { padding: 14px 16px 12px; width: 100vw; }
+  .todo-cols { grid-template-columns: 1fr; gap: 14px; }
+  .td-col h3 .hint { display: none; }
   .legend { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .legend .rule-note { display: none; }
   .toolbar > .chans, .toolbar > .types { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
@@ -1308,7 +1393,14 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   </section>
   <section class="view" id="v-activity" role="tabpanel" aria-labelledby="tab-activity" hidden>
     <div class="toolbar" id="tb-activity"></div>
-    <div class="briefing" id="briefing"></div>
+    <div class="act">
+      <div class="act-main" id="act-main">
+        <section class="todo-list" id="todo" aria-label="Your to-do list" hidden></section>
+        <section class="status-band" id="status-band" aria-label="Channel status"></section>
+        <div class="act-cols" id="cols"></div>
+      </div>
+      <aside class="queue" id="queue" aria-label="Flagged by Claude"></aside>
+    </div>
   </section>
   <section class="view" id="v-ideas" role="tabpanel" aria-labelledby="tab-ideas" hidden>
     <div class="toolbar" id="tb-ideas"></div>
@@ -1451,9 +1543,10 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     ch: new Set(),
     focus: null,
     actFilter: 'open',
-    openCh: store.get('openCh', {}),
-    openItems: new Set(),
-    showDone: {},
+    queueOpen: store.get('queueOpen', window.innerWidth >= 1680),
+    todoOpen: store.get('todoOpen', true),
+    todoAll: false,
+    openCards: new Set(),
     flash: null,
     visEdits: store.get('visEdits', {}),
     preview: false,
@@ -2027,17 +2120,11 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   // ── Activity: a briefing list, one row per channel ─────────────────────
   function renderActivityToolbar() {
     const f2 = S.actFilter;
-    const pending = ACTS.filter(a => a.state === 'pending').length;
-    const denied = ACTS.filter(a => a.state === 'denied').length;
-    const anyOpen = DATA.channels.some(c => S.openCh[c.id]);
     $('#tb-activity').innerHTML = `
       <h1>Activity</h1>
       ${searchBox('q-activity')}
-      <div class="seg" role="group" aria-label="Show items"><button data-actf="open" aria-pressed="${f2 === 'open'}">Open</button><button data-actf="blocked" aria-pressed="${f2 === 'blocked'}">Blocked</button><button data-actf="waiting" aria-pressed="${f2 === 'waiting'}">Waiting</button><button data-actf="all" aria-pressed="${f2 === 'all'}">All</button></div>
-      <button class="icon-btn" data-ch-all>${ic(anyOpen ? 'chevR' : 'chevD')}${anyOpen ? 'Collapse all' : 'Expand all'}</button>
+      <div class="seg" role="group" aria-label="Show"><button data-actf="open" aria-pressed="${f2 === 'open'}">Open</button><button data-actf="blocked" aria-pressed="${f2 === 'blocked'}">Blocked</button><button data-actf="waiting" aria-pressed="${f2 === 'waiting'}">Waiting</button><button data-actf="all" aria-pressed="${f2 === 'all'}">All</button></div>
       <span class="grow"></span>
-      ${PRIV() && pending ? `<button class="icon-btn" data-show-new>${ic('spark')}${pending} new from Claude</button>` : ''}
-      ${PRIV() && denied ? `<button class="icon-btn" data-show-denied>${ic('x')}Denied (${denied})</button>` : ''}
       <button class="icon-btn" data-export>${ic('download')}Export</button>`;
   }
 
@@ -2058,37 +2145,123 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     const link = withLink && s.url ? `<a class="open-src" href="${esc(s.url)}" target="_blank" rel="noopener">${OPEN_LABEL[s.type] || 'Open'} ${ic('link')}</a>` : '';
     return `<span class="src srcline">${ic(SRC_ICON[s.type] || 'note')}<span class="r">${SRC_NAME[s.type] || ''} · ${esc(s.ref)}${s.date ? ' · ' + f(dn(s.date)) : ''}</span>${link}</span>`;
   }
+  // on a card the whole source label is the link back to the thread, message or note
+  function srcLink(s) {
+    if (!s) return '';
+    const label = `${ic(SRC_ICON[s.type] || 'note')}<span class="r">${SRC_NAME[s.type] || ''} · ${esc(s.ref)}${s.date ? ' · ' + f(dn(s.date)) : ''}</span>`;
+    return s.url ? `<a class="src src-link" href="${esc(s.url)}" target="_blank" rel="noopener" title="${OPEN_LABEL[s.type] || 'Open'} (only you see this)">${label}</a>` : `<span class="src">${label}</span>`;
+  }
+  const refsHtml = a => (a.refs || []).length ? `<div class="refs">${a.refs.map(r => `<a class="open-src" href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.t)} ${ic('link')}</a>`).join('')}</div>` : '';
 
   const visChip = a => `<button class="vis-chip ${a.vis}" data-vis-toggle="${a.id}" title="${a.vis === 'team' ? 'Visible to the team. Click to make it only yours.' : 'Only you can see this. Click to share it with the team.'}">${ic(a.vis === 'team' ? 'users' : 'lock')}${a.vis === 'team' ? 'Team' : 'Only you'}</button>`;
   const statusPill = a => CAN_EDIT() && a.state !== 'pending'
     ? `<button class="pill ${a.status}" data-status-menu="${a.id}" aria-label="Status: ${STATUS_LABEL[a.status]}. Change">${ic(STATUS_ICON[a.status])}${STATUS_LABEL[a.status]}</button>`
     : `<span class="pill ${a.status}">${ic(STATUS_ICON[a.status])}${STATUS_LABEL[a.status]}</span>`;
 
-  // the drawer's "What's happening" keeps the card form
   function cardHtml(a) {
-    return `<article class="card ${a.status === 'done' ? 'done' : ''}" data-act="${a.id}">${itemDetail(a, true)}</article>`;
-  }
-
-  function itemDetail(a, inCard) {
     const due = dn(a.due);
     const overdue = due != null && due < TODAY && a.status !== 'done';
     const links = (a.links || []).filter(id => R[id]);
-    const s = a.src || {};
-    return `${inCard ? `<div class="ct">${esc(a.title)}</div>` : ''}
+    const firstLink = links[0] && R[links[0]];
+    const priv = PRIV() && ((a.src && a.src.quote) || a.pnote || (a.refs || []).length);
+    return `<article class="card ${a.status === 'done' ? 'done' : ''} ${S.flash === a.id ? 'arrived' : ''}" data-act="${a.id}">
       <div class="row1">${statusPill(a)}${a.kind === 'date_change' ? `<span class="pill change">${ic('arrow')}Date change</span>` : ''}${due != null ? `<span class="pill date ${overdue ? 'overdue' : ''}">${overdue ? 'Overdue · ' : 'Due '}${f(due)}</span>` : ''}</div>
-      ${a.detail ? `<p class="cd">${esc(a.detail)}</p>` : ''}
+      <div class="ct">${esc(a.title)}</div>
       ${(a.owner || a.wait) ? `<div class="who">${a.owner ? `<span>Owner <b>${esc(a.owner)}</b></span>` : ''}${a.wait ? `<span>Waiting on <b>${esc(a.wait)}</b></span>` : ''}</div>` : ''}
       ${a.impact ? `<div class="impact">${ic('arrow')}<span>${esc(a.impact)}</span></div>` : ''}
-      ${links.length ? `<div class="links">${links.map(id => `<button class="linked" data-open="${id}">${ic('gantt')}<span>${esc(R[id].t)}</span>${stIcon(R[id].a.state)}</button>`).join('')}</div>` : ''}
-      ${PRIV() ? `<div class="priv"><div class="priv-h">${ic('lock')}Only you</div>
-        ${srcLine(a.src, true)}
-        ${s.quote ? `<div class="quote">${esc(s.quote)}</div>` : ''}
-        ${a.state !== 'pending' ? `<div class="own-acts">${visChip(a)}<span class="sp"></span>
-          <button class="btn sm" data-done="${a.id}">${ic(a.status === 'done' ? 'reset' : 'check')}${a.status === 'done' ? 'Reopen' : 'Done'}</button>
-          <button class="btn sm" data-remove="${a.id}">${ic('x')}Remove</button></div>` : ''}
-      </div>` : ''}`;
+      ${firstLink ? `<button class="linked" data-open="${firstLink.id}">${ic('gantt')}<span>${esc(firstLink.t)}${links.length > 1 ? ` + ${links.length - 1} more` : ''}</span>${stIcon(firstLink.a.state)}</button>` : ''}
+      ${(a.detail || priv) ? `<details class="more-d" data-more="${a.id}"${S.openCards.has(a.id) ? ' open' : ''}><summary>Context ${ic('chevD', 'sm')}</summary><div class="body">
+        ${a.detail ? `<div class="cd">${esc(a.detail)}</div>` : ''}
+        ${priv ? `<div class="priv"><div class="priv-h">${ic('lock')}Only you</div>${a.src && a.src.quote ? `<div class="quote">${esc(a.src.quote)}</div>` : ''}${a.pnote ? `<div class="pnote">${esc(a.pnote)}</div>` : ''}${refsHtml(a)}</div>` : ''}
+      </div></details>` : ''}
+      ${PRIV() ? `<div class="foot">${visChip(a)}${srcLink(a.src)}<div class="acts">
+        <button class="mini" data-done="${a.id}" aria-label="${a.status === 'done' ? 'Reopen' : 'Mark done'}" title="${a.status === 'done' ? 'Reopen' : 'Mark done'}">${ic(a.status === 'done' ? 'reset' : 'check')}</button>
+        <button class="mini" data-remove="${a.id}" aria-label="Remove" title="Remove">${ic('x')}</button>
+      </div></div>` : ''}
+    </article>`;
   }
 
+  function addForm(c) {
+    return `<form class="add-form" data-add-form="${c.id}">
+      <input name="title" placeholder="What needs to happen?" required aria-label="Title">
+      <div class="r"><select name="status" aria-label="Status">${Object.keys(STATUS_LABEL).filter(s => s !== 'done').map(s => `<option value="${s}" ${s === 'todo' ? 'selected' : ''}>${STATUS_LABEL[s]}</option>`).join('')}</select><input name="due" type="date" aria-label="Due date"></div>
+      <div class="r"><input name="owner" placeholder="Owner" aria-label="Owner" value="Zoe"><input name="wait" placeholder="Waiting on" aria-label="Waiting on"></div>
+      <select name="vis" aria-label="Who can see it"><option value="team">Visible to the team</option><option value="private">Only me</option></select>
+      <select name="link" aria-label="Affects content"><option value="">Affects no content item</option>${BASE.filter(i => i.ch === c.id).map(i => `<option value="${i.id}">${esc(i.t)}</option>`).join('')}</select>
+      <div class="r"><button type="button" class="btn" data-add-cancel>Cancel</button><button class="btn primary" type="submit">Add</button></div>
+    </form>`;
+  }
+
+  function renderActivity() {
+    renderActivityToolbar();
+    const approved = ACTS.filter(a => a.state === 'approved' || a.state === 'completed');
+    $('#cols').innerHTML = DATA.channels.map(c => {
+      const all = approved.filter(a => a.cat === c.id);
+      const list = all.filter(actMatches).sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || (dn(a.due) ?? 1e9) - (dn(b.due) ?? 1e9));
+      return `<section class="col" data-col="${c.id}" aria-label="${esc(c.name)}">
+        <div class="col-h" data-ch="${c.id}">
+          <div class="top-row"><span class="chdot"></span><span class="col-name">${esc(c.name)}</span><span class="col-n">${list.length} ${S.actFilter === 'all' ? 'cards' : S.actFilter}</span>${CAN_EDIT() ? `<button class="add" data-add="${c.id}" aria-label="Add to ${esc(c.name)}" title="Add item">${ic('plus')}</button>` : ''}</div>
+        </div>
+        <div class="col-b">${S.addingIn === c.id && CAN_EDIT() ? addForm(c) : ''}${list.map(cardHtml).join('') || `<div class="col-empty">${all.length ? 'Nothing matches this filter.' : PRIV() ? 'Nothing here yet. Approve flagged items from the queue, or add one with +.' : 'Nothing logged yet.'}</div>`}</div>
+      </section>`;
+    }).join('');
+    renderStatusBand(approved);
+    renderTodo();
+    $('.act').classList.toggle('q-closed', !S.queueOpen);
+    $('.act').classList.toggle('no-queue', !PRIV());
+    $('#queue').hidden = !PRIV();
+    if (PRIV()) renderQueue();
+  }
+
+  // ── Your to-do list (Private view only): every open item you own, across all channels ──
+  const isMine = a => /\b(zoe|atlas)\b/i.test(a.owner || '') || (a.origin === 'manual' && !a.owner);
+  const chasing = a => (a.status === 'waiting' || a.status === 'blocked') && !!a.wait;
+  function renderTodo() {
+    const el = $('#todo');
+    if (!PRIV()) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    const mine = ACTS.filter(a => a.state === 'approved' && a.status !== 'done' && isMine(a) && qMatch(a));
+    const key = a => { const d = dn(a.due); return [d != null && d < TODAY ? 0 : 1, d ?? 1e9, STATUS_ORDER[a.status]]; };
+    const by = (x, y) => { const a = key(x), b = key(y); return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; };
+    const doNow = mine.filter(a => !chasing(a)).sort(by);
+    const chase = mine.filter(chasing).sort(by);
+    const overdue = mine.filter(a => dn(a.due) != null && dn(a.due) < TODAY).length;
+    const open = S.todoOpen;
+    const LIMIT = 6;
+    const row = a => {
+      const d = dn(a.due), od = d != null && d < TODAY;
+      const meta = [
+        `<span class="td-ch" data-ch="${a.cat}"><span class="chdot"></span>${esc(CH[a.cat] ? CH[a.cat].name : a.cat)}</span>`,
+        chasing(a) ? `<span class="td-st ${a.status}">${a.status === 'blocked' ? 'Blocked · waiting on ' : 'Waiting on '}${esc(shortWho(a.wait))}</span>` : a.status === 'in_progress' ? '<span class="td-st">In progress</span>' : '',
+        /^atlas$/i.test(a.owner || '') ? '<span class="td-st">Atlas</span>' : '',
+        a.vis === 'private' ? `<span class="td-st" title="Only you">${ic('lock', 'sm')}</span>` : ''
+      ].join('');
+      return `<li class="td-row">
+        <button class="td-check" data-done="${a.id}" aria-label="Mark done: ${esc(a.title)}" title="Mark done">${ic('check')}</button>
+        <div class="td-main"><button class="td-t" data-jump="${a.id}" title="Show it in ${esc(CH[a.cat] ? CH[a.cat].name : '')}">${esc(a.title)}</button><div class="td-meta">${meta}</div></div>
+        <span class="td-due ${od ? 'overdue' : ''}">${d != null ? `${od ? 'Overdue ' : ''}${f(d)}` : ''}</span>
+      </li>`;
+    };
+    const col = (title, hint, list) => `<section class="td-col"><h3><span>${title}</span><b>${list.length}</b><span class="hint">${hint}</span></h3>
+      <ul>${(S.todoAll ? list : list.slice(0, LIMIT)).map(row).join('') || `<li class="td-empty">${S.q ? 'Nothing matches the search.' : 'Nothing here.'}</li>`}</ul></section>`;
+    const more = Math.max(doNow.length, chase.length) > LIMIT;
+    el.innerHTML = `<header class="todo-h">
+        <button class="todo-toggle" data-todo-toggle aria-expanded="${open}">${ic(open ? 'chevD' : 'chevR')}<h2>Your to-do</h2></button>
+        <span class="lbl">${plural(mine.length, 'open item')} across ${plural(new Set(mine.map(a => a.cat)).size, 'channel')}${overdue ? ` · <b class="od">${overdue} overdue</b>` : ''}</span>
+        <span class="only-you">${ic('lock', 'sm')}Only you</span>
+      </header>
+      ${open ? `<div class="todo-cols">${col('To do', 'Yours to move', doNow)}${col('Chasing', 'Waiting on someone else', chase)}</div>
+        ${more ? `<button class="td-more" data-todo-all>${S.todoAll ? 'Show fewer' : `Show all ${mine.length}`} ${ic(S.todoAll ? 'chevD' : 'chevR', 'sm')}</button>` : ''}` : ''}`;
+  }
+  function jumpTo(id) {
+    let card = $(`#cols [data-act="${id}"]`);
+    if (!card) { S.actFilter = 'open'; S.q = ''; renderActivity(); card = $(`#cols [data-act="${id}"]`); }
+    if (!card) return;
+    card.scrollIntoView({ block: 'center', inline: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    card.classList.remove('arrived'); void card.offsetWidth; card.classList.add('arrived');
+  }
+
+  // ── Channel status: the TL;DR band above the columns ─────────────────
   const shortWho = w => String(w || '').split(/[(·/,]/)[0].replace(/^(Waiting on|Owner)\s+/i, '').trim();
   function channelStatus(ch, approved) {
     const open = approved.filter(a => a.cat === ch && a.status !== 'done');
@@ -2109,123 +2282,108 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     next.sort((a, b) => a.d - b.d);
     return { state, open, blocked, waiting, people, next: next[0] };
   }
-  const STATE_WORDS = { blocked: 'Has blockers', attention: 'Needs attention', ok: 'On track' };
-
-  function itemRow(a) {
-    const open = S.openItems.has(a.id);
-    const due = dn(a.due);
-    const overdue = due != null && due < TODAY && a.status !== 'done';
-    const right = due != null && a.status !== 'done' ? `${overdue ? 'Overdue' : 'Due'} ${f(due)}` : shortWho(a.wait) || a.owner || '';
-    const s = a.src || {};
-    return `<div class="bl-item ${a.status} ${open ? 'open' : ''} ${S.flash === a.id ? 'flash' : ''}" data-item-toggle="${a.id}" role="button" tabindex="0" aria-expanded="${open}">
-        <span class="st-ic" title="${STATUS_LABEL[a.status]}">${ic(STATUS_ICON[a.status])}</span>
-        <span class="bl-t">${esc(a.title)}</span>
-        <span class="bl-who ${overdue ? 'overdue' : ''}">${esc(right)}</span>
-        <span class="bl-src">${PRIV() && s.type ? ic(SRC_ICON[s.type] || 'note', 'sm') : ''}${PRIV() && a.vis === 'private' ? ic('lock', 'sm') : ''}</span>
-        <span class="chev-s">${ic(open ? 'chevD' : 'chevR', 'sm')}</span>
-      </div>${open ? `<div class="bl-detail">${itemDetail(a)}</div>` : ''}`;
+  const STATE_BADGE = { blocked: ['Blocked', 'alert'], attention: ['Needs attention', 'clock'], ok: ['On track', 'check'] };
+  function renderStatusBand(approved) {
+    $('#status-band').innerHTML = DATA.channels.map(c => {
+      const st = channelStatus(c.id, approved);
+      const t = { ...((DATA.status || {})[c.id] || {}), ...(S.tldr[c.id] || {}) };
+      const upd = dn(t.updated);
+      const stale = upd != null && TODAY - upd > 7;
+      const state = t.state && STATE_BADGE[t.state] ? t.state : st.state;
+      const [label, icon] = STATE_BADGE[state];
+      const editing = S.editingTldr === c.id && CAN_EDIT();
+      const facts = [
+        st.blocked.length ? `<div><dt>Blocked</dt><dd>${esc(st.blocked[0].title)}${st.blocked.length > 1 ? ` <span class="more-n">+${st.blocked.length - 1}</span>` : ''}</dd></div>` : '',
+        st.people.length ? `<div><dt>Waiting on</dt><dd>${esc(st.people.slice(0, 4).join(', '))}${st.people.length > 4 ? ` +${st.people.length - 4}` : ''}</dd></div>` : '',
+        st.next ? `<div><dt>Next</dt><dd><span class="mono">${fw(st.next.d)}</span> · ${esc(st.next.t)}</dd></div>` : ''
+      ].join('');
+      return `<article class="st-tile ${state}" data-ch="${c.id}">
+        <header><span class="chdot"></span><h2>${esc(c.name)}</h2></header>
+        <span class="st-badge ${state}" title="${t.state && STATE_BADGE[t.state] ? 'Set by Zoe' : 'Worked out from the cards below'}">${ic(icon, 'sm')}${label}</span>
+        ${editing ? `<form class="tldr-form" data-tldr-form="${c.id}"><textarea name="text" rows="4" aria-label="${esc(c.name)} TL;DR">${esc(t.text || '')}</textarea>
+          <select name="state" aria-label="Channel status"><option value="auto" ${!t.state || t.state === 'auto' ? 'selected' : ''}>Status: automatic (${STATE_BADGE[st.state][0]})</option>${Object.entries(STATE_BADGE).map(([k, v]) => `<option value="${k}" ${t.state === k ? 'selected' : ''}>${v[0]}</option>`).join('')}</select>
+          <div class="r"><button type="button" class="btn" data-tldr-cancel>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`
+          : `<p class="tldr">${t.text ? esc(t.text) : '<span class="empty">No summary yet.</span>'}${CAN_EDIT() ? `<button class="mini tldr-edit" data-tldr-edit="${c.id}" aria-label="Edit the ${esc(c.name)} TL;DR" title="Edit TL;DR">${ic('note')}</button>` : ''}</p>`}
+        ${facts ? `<dl class="st-facts">${facts}</dl>` : ''}
+        <footer><span>${st.open.length} open${st.blocked.length ? ` · <b class="r">${st.blocked.length} blocked</b>` : ''}${st.waiting.length ? ` · <b class="a">${st.waiting.length} waiting</b>` : ''}</span><span class="${stale ? 'stale' : ''}">${upd != null ? `Updated ${f(upd)}${stale ? ' · may be stale' : ''}` : ''}</span></footer>
+      </article>`;
+    }).join('');
   }
 
-  function newRow(a) {
-    const open = S.openItems.has(a.id);
-    const due = dn(a.due);
-    const s = a.src || {};
-    return `<div class="nw-item ${open ? 'open' : ''}" data-q="${a.id}">
-      <div class="nw-row">
-        <span class="spark-s">${ic('spark')}</span>
-        <button class="bl-t nw-t" data-item-toggle="${a.id}" aria-expanded="${open}">${esc(a.title)}</button>
-        <span class="bl-src" title="${SRC_NAME[s.type] || ''}">${s.type ? ic(SRC_ICON[s.type] || 'note', 'sm') : ''}</span>
-        <div class="seg vis-seg" role="group" aria-label="Who can see it"><button data-qvis="${a.id}" data-v="team" aria-pressed="${a.vis === 'team'}">${ic('users', 'sm')}Team</button><button data-qvis="${a.id}" data-v="private" aria-pressed="${a.vis !== 'team'}">${ic('lock', 'sm')}Only you</button></div>
-        <button class="btn sm" data-deny="${a.id}" title="Not needed. Claude won't suggest it again.">Deny</button>
-        <button class="btn sm" data-complete="${a.id}" title="Already taken care of. Logged as done.">${ic('check')}Completed</button>
-        <button class="btn sm primary" data-approve="${a.id}" title="Add it to this channel">Approve</button>
+  // ── Flagged by Claude: the approval queue (Private view only) ─────────
+  let showDenied = false;
+  function renderQueue() {
+    const pending = ACTS.filter(a => a.state === 'pending');
+    const denied = ACTS.filter(a => a.state === 'denied');
+    const scans = (ACT.scans || []).map(s => `<span class="scan" title="${esc(s.window + ' · ' + s.note)}"><span class="ok"></span>${ic(SRC_ICON[s.type])}${SRC_NAME[s.type]}</span>`).join('');
+    $('#queue').classList.toggle('closed', !S.queueOpen);
+    $('#queue').innerHTML = `
+      <button class="q-rail" data-queue-toggle aria-label="Show the flagged queue (${pending.length})" aria-expanded="false"><span class="spark">${ic('spark')}</span>${pending.length ? `<span class="n">${pending.length}</span>` : ''}<span class="vt">Flagged by Claude</span></button>
+      <div class="q-h">
+        <div class="tl"><span class="spark">${ic('spark')}</span><h2>Flagged by Claude</h2>${pending.length ? `<span class="n">${pending.length}</span>` : ''}<button class="mini" data-queue-toggle aria-label="Hide the queue" aria-expanded="true" title="Hide the queue">${ic('chevR')}</button></div>
+        <p>New action items from Gmail, Granola and Slack. <b>Approve</b> adds it to its column, <b>Completed</b> logs it as already handled, and <b>Deny</b> means it isn't needed. Anything from a DM starts as Only you.</p>
+        <div class="scans">${scans}</div>
       </div>
-      ${open ? `<div class="bl-detail">${itemDetail(a)}
-        <label class="nw-move">Belongs in <select data-q-cat="${a.id}">${DATA.channels.map(c => `<option value="${c.id}" ${c.id === a.cat ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></label></div>` : ''}
-    </div>`;
+      <div class="q-list">${pending.length ? pending.map(a => `
+        <article class="q-card" data-q="${a.id}" tabindex="0" aria-label="${esc(a.title)}">
+          <div class="row1">
+            <select data-q-cat="${a.id}" aria-label="Channel">${DATA.channels.map(c => `<option value="${c.id}" ${c.id === a.cat ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
+            ${a.due ? `<span class="pill date ${dn(a.due) < TODAY ? 'overdue' : ''}">${dn(a.due) < TODAY ? 'Overdue · ' : 'Due '}${f(dn(a.due))}</span>` : ''}
+            <span class="conf">${esc(a.conf || '')} confidence</span>
+          </div>
+          <div class="ct">${esc(a.title)}</div>
+          ${a.detail ? `<div class="cd">${esc(a.detail)}</div>` : ''}
+          ${a.src && a.src.quote ? `<div class="quote">${esc(a.src.quote)}</div>` : ''}
+          ${srcLine(a.src, true)}
+          <div class="q-vis"><span class="lbl">Who sees it</span><div class="seg vis-seg" role="group" aria-label="Who can see it"><button data-qvis="${a.id}" data-v="team" aria-pressed="${a.vis === 'team'}">${ic('users', 'sm')}Team</button><button data-qvis="${a.id}" data-v="private" aria-pressed="${a.vis !== 'team'}">${ic('lock', 'sm')}Only you</button></div></div>
+          <div class="q-acts"><button class="btn" data-deny="${a.id}" title="Not needed. Claude won't suggest it again.">Deny <kbd>D</kbd></button><button class="btn" data-complete="${a.id}" title="Already taken care of. Logged as done.">${ic('check')}Done <kbd>C</kbd></button><button class="btn primary" data-approve="${a.id}" title="Add it to its column">Approve <kbd>A</kbd></button></div>
+        </article>`).join('') : `<div class="q-empty"><div class="disp">All clear</div>The queue is empty. New items appear here after each scan.</div>`}</div>
+      ${denied.length ? `<div class="q-foot"><button data-toggle-denied>${ic(showDenied ? 'chevD' : 'chevR')}${plural(denied.length, 'denied item')}</button></div>
+        ${showDenied ? `<div class="denied-list">${denied.map(a => `<div class="dn-row"><span>${esc(a.title)}</span><button class="mini" data-undeny="${a.id}" title="Move back to the queue" aria-label="Move back to the queue">${ic('reset')}</button></div>`).join('')}</div>` : ''}` : ''}`;
   }
 
-  function addForm(c) {
-    return `<form class="add-form" data-add-form="${c.id}">
-      <input name="title" placeholder="What needs to happen?" required aria-label="Title">
-      <div class="r"><select name="status" aria-label="Status">${Object.keys(STATUS_LABEL).filter(s => s !== 'done').map(s => `<option value="${s}" ${s === 'todo' ? 'selected' : ''}>${STATUS_LABEL[s]}</option>`).join('')}</select><input name="due" type="date" aria-label="Due date"></div>
-      <div class="r"><input name="owner" placeholder="Owner" aria-label="Owner"><input name="wait" placeholder="Waiting on" aria-label="Waiting on"></div>
-      <select name="vis" aria-label="Who can see it"><option value="team">Visible to the team</option><option value="private">Only me</option></select>
-      <select name="link" aria-label="Affects content"><option value="">Affects no content item</option>${BASE.filter(i => i.ch === c.id).map(i => `<option value="${i.id}">${esc(i.t)}</option>`).join('')}</select>
-      <div class="r"><button type="button" class="btn" data-add-cancel>Cancel</button><button class="btn primary" type="submit">Add</button></div>
-    </form>`;
-  }
-
-  function channelRow(c, approved, pendingAll) {
-    const st = channelStatus(c.id, approved);
-    const t = { ...((DATA.status || {})[c.id] || {}), ...(S.tldr[c.id] || {}) };
-    const state = t.state && STATE_WORDS[t.state] ? t.state : st.state;
-    const upd = dn(t.updated);
-    const stale = upd != null && TODAY - upd > 7;
-    const mine = approved.filter(a => a.cat === c.id);
-    const list = mine.filter(a => a.status !== 'done' || S.actFilter === 'all').filter(actMatches)
-      .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || (dn(a.due) ?? 1e9) - (dn(b.due) ?? 1e9));
-    const done = mine.filter(a => a.status === 'done' && qMatch(a));
-    const pending = pendingAll.filter(a => a.cat === c.id && qMatch(a));
-    const auto = (S.q || S.focus === 'waiting') && (list.length || pending.length);
-    const open = !!(S.openCh[c.id] || auto);
-    const editing = S.editingTldr === c.id && CAN_EDIT();
-    const meta = [
-      st.people.length ? `<div><dt>Waiting on</dt><dd title="${esc(st.people.join(', '))}">${esc(st.people.join(', '))}</dd></div>` : '',
-      st.next ? `<div><dt>Next</dt><dd title="${esc(fw(st.next.d) + ' · ' + st.next.t)}"><span class="mono">${fw(st.next.d)}</span> · ${esc(st.next.t)}</dd></div>` : ''
-    ].join('');
-    const showDone = S.showDone[c.id];
-    return `<section class="bl-row ${open ? 'is-open' : ''}" data-ch="${c.id}" aria-label="${esc(c.name)}">
-      <div class="bl-head" data-ch-toggle="${c.id}" role="button" tabindex="0" aria-expanded="${open}">
-        <span class="chev">${ic(open ? 'chevD' : 'chevR')}</span>
-        <span class="bl-name"><span class="state-dot ${state}" title="${STATE_WORDS[state]}${t.state && STATE_WORDS[t.state] ? ' (set by Zoe)' : ''}"></span><h3>${esc(c.name)}</h3></span>
-        <p class="bl-tldr">${t.text ? esc(t.text) : '<span class="empty">No summary yet.</span>'}${stale ? `<span class="stale">Updated ${f(upd)} · may be out of date</span>` : ''}${CAN_EDIT() ? `<button class="mini tldr-edit" data-tldr-edit="${c.id}" aria-label="Edit the ${esc(c.name)} summary" title="Edit summary">${ic('note')}</button>` : ''}</p>
-        <dl class="bl-meta">${meta}</dl>
-        <span class="bl-n">${pending.length ? `<span class="new-pill" title="New from Claude">${ic('spark')}${pending.length} new</span>` : ''}${st.open.length} open</span>
-      </div>
-      ${open || editing ? `<div class="bl-body">
-        ${editing ? `<form class="tldr-form" data-tldr-form="${c.id}"><textarea name="text" rows="3" aria-label="${esc(c.name)} summary">${esc(t.text || '')}</textarea>
-          <select name="state" aria-label="Channel status"><option value="auto" ${!t.state || t.state === 'auto' ? 'selected' : ''}>Status dot: automatic (${STATE_WORDS[st.state].toLowerCase()})</option>${Object.entries(STATE_WORDS).map(([k, v]) => `<option value="${k}" ${t.state === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
-          <div class="r"><button type="button" class="btn" data-tldr-cancel>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>` : ''}
-        ${open ? `
-          ${list.map(itemRow).join('') || `<div class="bl-empty">${mine.length ? 'Nothing matches this filter.' : 'Nothing logged yet.'}</div>`}
-          ${pending.length ? `<div class="nw"><div class="nw-h">${ic('spark')}New from Claude for ${esc(c.name)} · ${pending.length}<span class="hint">Approve to add it, Completed if it's already handled, Deny if it isn't needed.</span></div>${pending.map(newRow).join('')}</div>` : ''}
-          ${(done.length && S.actFilter !== 'all') || CAN_EDIT() ? `<div class="bl-foot">
-            ${done.length && S.actFilter !== 'all' ? `<button data-done-toggle="${c.id}"><span class="done-ic">${ic('check')}</span>${done.length} done ${ic(showDone ? 'chevD' : 'chevR', 'sm')}</button>` : ''}
-            ${CAN_EDIT() ? `<button data-add="${c.id}">${ic('plus')}Add to ${esc(c.name)}</button>` : ''}
-          </div>` : ''}
-          ${showDone && S.actFilter !== 'all' ? `<div class="bl-doneList">${done.map(itemRow).join('')}</div>` : ''}
-          ${S.addingIn === c.id ? addForm(c) : ''}` : ''}
-      </div>` : ''}
-    </section>`;
-  }
-
-  function renderActivity() {
-    renderActivityToolbar();
-    const approved = ACTS.filter(a => a.state === 'approved' || a.state === 'completed');
-    const pending = PRIV() ? ACTS.filter(a => a.state === 'pending') : [];
-    $('#briefing').innerHTML = DATA.channels.map(c => channelRow(c, approved, pending)).join('');
-  }
-
-  function decide(id, decision, msg) {
+  // Approve and Completed fly the card into its column; Deny slides it out.
+  function settle(id, decision, el) {
+    const card = el || $(`[data-q="${id}"]`);
     const a = ACTS.find(x => x.id === id);
     if (!a) return;
-    S.decisions[id] = decision; save('decisions');
-    S.openItems.delete(id);
-    if (decision !== 'denied') { S.openCh[a.cat] = true; save('openCh'); S.flash = id; }
-    if (decision === 'completed') { S.showDone[a.cat] = true; }
-    refresh();
-    setTimeout(() => { S.flash = null; }, 1200);
-    toast(msg(a), () => { delete S.decisions[id]; save('decisions'); refresh(); });
+    const col = $(`[data-col="${a.cat}"] .col-b`);
+    const done = () => {
+      S.decisions[id] = decision; save('decisions');
+      S.flash = id;
+      if (decision === 'completed' && S.actFilter === 'open') S.actFilter = 'all';
+      refresh();
+      setTimeout(() => { S.flash = null; }, 1200);
+      const c = $(`#cols [data-act="${id}"]`);
+      if (c) c.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      toast(decision === 'completed' ? `Logged as done in ${CH[a.cat].name}` : `Added to ${CH[a.cat].name} · ${a.vis === 'team' ? 'visible to the team' : 'only you'}`, () => { delete S.decisions[id]; save('decisions'); refresh(); });
+    };
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!card || !col || reduce || !col.getClientRects().length) return done();
+    const from = card.getBoundingClientRect();
+    const to = col.getBoundingClientRect();
+    const fly = card.cloneNode(true);
+    fly.className = 'flyer';
+    Object.assign(fly.style, { left: from.left + 'px', top: from.top + 'px', width: from.width + 'px', height: from.height + 'px' });
+    document.body.appendChild(fly);
+    card.style.visibility = 'hidden';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      fly.style.transform = `translate(${to.left + 10 - from.left}px, ${to.top + 10 - from.top}px)`;
+      fly.style.width = (to.width - 20) + 'px';
+      fly.style.height = '96px';
+      fly.style.opacity = '0.2';
+    }));
+    setTimeout(() => { fly.remove(); done(); }, 520);
   }
-  const approve = id => decide(id, 'approved', a => `Added to ${CH[a.cat].name} · ${a.vis === 'team' ? 'visible to the team' : 'only you'}`);
-  const complete = id => decide(id, 'completed', a => `Logged as done in ${CH[a.cat].name}`);
-  const deny = id => decide(id, 'denied', () => 'Denied. Claude won\'t suggest it again');
-
-  function deniedPop(anchor) {
-    const denied = ACTS.filter(a => a.state === 'denied');
-    openPop(anchor, `<h4>Denied</h4><div class="sub">Not needed · Claude won't suggest these again</div>
-      <div class="dismissed-list">${denied.map(a => `<div class="dn-row"><span>${esc(a.title)}</span><button class="mini" data-undeny="${a.id}" title="Move back to new" aria-label="Move back to new">${ic('reset')}</button></div>`).join('') || '<div class="sub">Nothing denied.</div>'}</div>`, 360);
+  const approve = (id, el) => settle(id, 'approved', el);
+  const complete = (id, el) => settle(id, 'completed', el);
+  function deny(id) {
+    const card = $(`[data-q="${id}"]`);
+    const go = () => {
+      S.decisions[id] = 'denied'; save('decisions'); refresh();
+      toast('Denied. Claude won\'t suggest it again', () => { delete S.decisions[id]; save('decisions'); refresh(); });
+    };
+    if (card) { card.classList.add('leaving'); setTimeout(go, 220); } else go();
   }
 
   // ── Content Ideas (from the Content Doc) ───────────────────────────────
@@ -2685,15 +2843,11 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if ((el = t.closest('[data-approve]'))) return approve(el.dataset.approve);
     if ((el = t.closest('[data-complete]'))) return complete(el.dataset.complete);
     if ((el = t.closest('[data-deny]'))) return deny(el.dataset.deny);
-    if ((el = t.closest('[data-item-toggle]'))) { const id = el.dataset.itemToggle; S.openItems.has(id) ? S.openItems.delete(id) : S.openItems.add(id); return renderActivity(); }
-    if ((el = t.closest('[data-ch-toggle]'))) { const c = el.dataset.chToggle; S.openCh[c] = !S.openCh[c]; save('openCh'); return renderActivity(); }
-    if (t.closest('[data-ch-all]')) { const any = DATA.channels.some(c => S.openCh[c.id]); S.openCh = any ? {} : Object.fromEntries(DATA.channels.map(c => [c.id, true])); save('openCh'); return renderActivity(); }
-    if ((el = t.closest('[data-done-toggle]'))) { const c = el.dataset.doneToggle; S.showDone[c] = !S.showDone[c]; return renderActivity(); }
-    if (t.closest('[data-show-new]')) {
-      ACTS.filter(a => a.state === 'pending').forEach(a => { S.openCh[a.cat] = true; }); save('openCh'); renderActivity();
-      const first = $('.nw'); return first && first.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    }
-    if ((el = t.closest('[data-show-denied]'))) return deniedPop(el);
+    if (t.closest('[data-queue-toggle]')) { S.queueOpen = !S.queueOpen; save('queueOpen'); return renderActivity(); }
+    if (t.closest('[data-toggle-denied]')) { showDenied = !showDenied; return renderQueue(); }
+    if (t.closest('[data-todo-toggle]')) { S.todoOpen = !S.todoOpen; save('todoOpen'); return renderTodo(); }
+    if (t.closest('[data-todo-all]')) { S.todoAll = !S.todoAll; return renderTodo(); }
+    if ((el = t.closest('[data-jump]'))) return jumpTo(el.dataset.jump);
     if ((el = t.closest('[data-theme-set]'))) {
       document.documentElement.setAttribute('data-theme', el.dataset.themeSet);
       store.set('theme', el.dataset.themeSet);
@@ -2754,7 +2908,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       return toast(old === 'done' ? 'Reopened' : 'Marked done', () => { setAct(id, { status: old }); refresh(); });
     }
     if ((el = t.closest('[data-remove]'))) { const id = el.dataset.remove; setAct(id, { removed: true }); refresh(); return toast('Removed', () => { setAct(id, { removed: false }); refresh(); }); }
-    if ((el = t.closest('[data-add]'))) { S.addingIn = S.addingIn === el.dataset.add ? null : el.dataset.add; S.openCh[el.dataset.add] = true; renderActivity(); const inp = $(`[data-add-form] input[name=title]`); if (inp) inp.focus(); return; }
+    if ((el = t.closest('[data-add]'))) { S.addingIn = S.addingIn === el.dataset.add ? null : el.dataset.add; renderActivity(); const inp = $(`[data-add-form] input[name=title]`); if (inp) inp.focus(); return; }
     if (t.closest('[data-add-cancel]')) { S.addingIn = null; return renderActivity(); }
     if (t.closest('[data-tldr-cancel]')) { S.editingTldr = null; return renderActivity(); }
     if (t.closest('[data-export]')) return exportData();
@@ -2790,7 +2944,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     };
     if (!item.title) return;
     S.added.push(item); save('added');
-    S.addingIn = null; S.openCh[item.cat] = true; save('openCh');
+    S.addingIn = null;
     refresh();
     toast(`Added to ${CH[item.cat].name}`);
   });
@@ -2802,7 +2956,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       setOverride(S.sel, t.dataset.edit, v);
       return ripple(S.sel);
     }
-    if (t.matches('[data-q-cat]')) { S.catEdits[t.dataset.qCat] = t.value; save('catEdits'); S.openCh[t.value] = true; save('openCh'); refresh(); return toast(`Moved to ${CH[t.value].name}`); }
+    if (t.matches('[data-q-cat]')) { S.catEdits[t.dataset.qCat] = t.value; save('catEdits'); refresh(); return toast(`Moved to ${CH[t.value].name}`); }
     if (t.matches('[data-rule]')) {
       const v = Math.max(+t.min, Math.min(+t.max, +t.value || 0));
       S.rules[t.dataset.rule] = v;
@@ -2810,6 +2964,12 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       return refresh();
     }
   });
+
+  // a card's Context stays open across re-renders
+  document.addEventListener('toggle', e => {
+    const d = e.target;
+    if (d.matches && d.matches('details[data-more]')) d.open ? S.openCards.add(d.dataset.more) : S.openCards.delete(d.dataset.more);
+  }, true);
 
   document.addEventListener('input', e => {
     const t = e.target;
@@ -2843,7 +3003,10 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       if (sec) { S.collapsed[sec] = !S.collapsed[sec]; save('collapsed'); renderGantt(); const n = $(`[data-sec="${sec}"]`); n && n.focus(); return; }
       return openDrawer(e.target.closest('.g-row').dataset.id);
     }
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-ch-toggle], .bl-item[data-item-toggle]')) { e.preventDefault(); return e.target.click(); }
+    const q = e.target.closest('.q-card');
+    if (q && (e.key === 'a' || e.key === 'A')) { e.preventDefault(); return approve(q.dataset.q, q); }
+    if (q && (e.key === 'c' || e.key === 'C')) { e.preventDefault(); return complete(q.dataset.q, q); }
+    if (q && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); return deny(q.dataset.q); }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === '1') return setView('activity');
     if (e.key === '2') return setView('ideas');
