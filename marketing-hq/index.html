@@ -967,6 +967,44 @@ details.more-d .body { margin-top: 8px; display: flex; flex-direction: column; g
 .empty-state { padding: 48px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; color: var(--ink-3); }
 .empty-state p { margin: 0; }
 
+/* deck images: card covers, galleries, boards, viewer */
+.idea { overflow: hidden; }
+.icover { display: grid; gap: 2px; height: 136px; margin: -14px -16px 3px; background: var(--s2); }
+.icover.n1 { grid-template-columns: 1fr; }
+.icover.n2 { grid-template-columns: 1fr 1fr; }
+.icover.n3 { grid-template-columns: 1.5fr 1fr 1fr; }
+.icover-i { min-width: 0; overflow: hidden; background: var(--s3); }
+.icover img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 400ms var(--ease); }
+.icover.slide img { object-position: left top; }
+.idea:hover .icover img { transform: scale(1.03); }
+.icover.none { display: grid; place-items: center; font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-4); }
+.igal { columns: 2; column-gap: 8px; }
+.ifig { display: block; width: 100%; margin: 0 0 8px; break-inside: avoid; position: relative; border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); background: var(--s2); cursor: zoom-in; transition: border-color 160ms; }
+.ifig:hover { border-color: var(--line-3); }
+.ifig img { display: block; width: 100%; height: auto; }
+.ifig .cap { position: absolute; left: 6px; bottom: 6px; padding: 4px 6px; border-radius: 4px; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink); }
+.ifig:has(img.broken), .icover-i:has(img.broken) { display: none; }
+img.broken { visibility: hidden; }
+.bgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.bgrid .ifig { margin: 0; }
+.lightbox { position: fixed; inset: 0; z-index: 85; display: grid; place-items: center; padding: 60px 76px; background: rgba(0, 0, 0, 0.9); animation: viewIn 180ms var(--ease); }
+.lightbox[hidden] { display: none; }
+.lightbox figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; max-width: 100%; }
+.lightbox img { display: block; max-width: min(1400px, 100%); max-height: calc(100vh - 150px); width: auto; height: auto; object-fit: contain; border-radius: 4px; background: #131211; cursor: default; }
+.lightbox figcaption { color: #bdbab5; }
+.lb-x, .lb-nav { position: absolute; display: grid; place-items: center; border-radius: 50%; color: #eeecea; background: rgba(238, 236, 234, 0.08); transition: background-color 160ms; }
+.lb-x:hover, .lb-nav:hover { background: rgba(238, 236, 234, 0.18); }
+.lb-x { top: 16px; right: 16px; width: 40px; height: 40px; }
+.lb-nav { top: 50%; width: 46px; height: 46px; transform: translateY(-50%); }
+.lb-nav.prev { left: 16px; } .lb-nav.next { right: 16px; }
+.lb-x .i, .lb-nav .i { width: 18px; height: 18px; }
+@media (max-width: 640px) {
+  .lightbox { padding: 64px 12px 84px; }
+  .lb-nav { top: auto; bottom: 20px; transform: none; }
+  .icover { height: 150px; }
+  .bgrid { grid-template-columns: 1fr; }
+}
+
 /* idea drawer */
 .dr-pitch { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
 .dr-back { align-self: flex-start; max-width: 100%; display: inline-flex; align-items: center; gap: 4px; margin: -4px 0 -2px -3px; font: 400 10px/1.3 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2219,6 +2257,58 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     ...(it.extras || []).flatMap(x => [x.h, ...x.lines]), ...(it.versions || []).map(v => v.t + ' ' + v.what)].join(' ').toLowerCase();
   const ideaQ = it => !S.q || S.q.toLowerCase().split(/\s+/).every(w => ideaText(it).includes(w));
 
+  // Deck images: files next to the page locally; short-lived signed links from the private bucket on the live page.
+  const IMG_BASE = window.HQ_IMG_BASE || 'assets/ideas/';
+  const MEDIA = () => IDEAS.media || { byIdea: {}, slides: {}, boards: [] };
+  const pagesOf = sl => { const [a, b] = String(sl).split(/[–-]/).map(Number); const out = []; for (let p = a; p <= (b || a); p++) out.push(String(p)); return out; };
+  const imgTag = (m, full) => `<img data-img="${esc(full ? m.f : 't-' + m.f)}" alt="" loading="lazy" decoding="async" width="${m.w}" height="${m.h}">`;
+  function ideaMedia(it) {
+    const md = MEDIA();
+    const slides = pagesOf(it.slide).map(p => md.slides[p] && { ...md.slides[p], cap: `Slide ${p}` }).filter(Boolean);
+    return [...(md.byIdea[it.id] || []), ...slides];
+  }
+  function hydrateImages(root) {
+    const els = $$('img[data-img]:not([src])', root);
+    if (!els.length) return;
+    const fill = map => els.forEach(el => { if (map[el.dataset.img]) el.src = map[el.dataset.img]; else el.classList.add('broken'); });
+    if (LIVE && LIVE.imgUrls) LIVE.imgUrls([...new Set(els.map(e => e.dataset.img))]).then(fill).catch(() => {});
+    else fill(Object.fromEntries(els.map(e => [e.dataset.img, IMG_BASE + e.dataset.img])));
+  }
+  document.addEventListener('error', e => { if (e.target.matches && e.target.matches('img[data-img]')) e.target.classList.add('broken'); }, true);
+
+  function coverHtml(it) {
+    const md = MEDIA();
+    const ims = (md.byIdea[it.id] || []).slice(0, 3);
+    if (ims.length) return `<span class="icover n${ims.length}" aria-hidden="true">${ims.map(m => `<span class="icover-i">${imgTag(m)}</span>`).join('')}</span>`;
+    const sl = pagesOf(it.slide).map(p => md.slides[p]).find(Boolean);
+    return sl ? `<span class="icover n1 slide" aria-hidden="true"><span class="icover-i">${imgTag(sl)}</span></span>` : '<span class="icover none" aria-hidden="true"><span>No images in the deck</span></span>';
+  }
+
+  // Full-size viewer for deck images and boards
+  let LB = null;
+  function openLightbox(key, k) {
+    const list = key === 'boards' ? MEDIA().boards.map(b => ({ ...b, cap: `Slide ${b.slide}${b.t ? ' · ' + b.t : ''}` })) : ideaMedia(IDEA[key]);
+    LB = { list, k: Number(k) || 0, back: document.activeElement };
+    renderLightbox();
+  }
+  function renderLightbox() {
+    let el = $('#lightbox');
+    if (!el) { el = document.createElement('div'); el.id = 'lightbox'; el.className = 'lightbox'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Image viewer'); document.body.appendChild(el); }
+    const m = LB.list[LB.k], n = LB.list.length;
+    el.innerHTML = `<button class="lb-x" data-lb-close aria-label="Close">${ic('x')}</button>
+      ${n > 1 ? `<button class="lb-nav prev" data-lb="-1" aria-label="Previous image">${ic('chevL')}</button><button class="lb-nav next" data-lb="1" aria-label="Next image">${ic('chevR')}</button>` : ''}
+      <figure><img data-img="${esc(m.f)}" alt="${esc(m.cap || `Image ${LB.k + 1} of ${n}`)}" width="${m.w}" height="${m.h}"><figcaption class="lbl">${m.cap ? `${esc(m.cap)} · ` : ''}${LB.k + 1} of ${n}</figcaption></figure>`;
+    el.hidden = false;
+    hydrateImages(el);
+    el.querySelector('[data-lb-close]').focus({ preventScroll: true });
+  }
+  const stepLightbox = d => { LB.k = (LB.k + d + LB.list.length) % LB.list.length; renderLightbox(); };
+  function closeLightbox() {
+    const el = $('#lightbox'); if (el) { el.hidden = true; el.innerHTML = ''; }
+    const back = LB && LB.back; LB = null;
+    if (back && document.contains(back)) back.focus({ preventScroll: true });
+  }
+
   function renderIdeasToolbar(counts) {
     $('#tb-ideas').innerHTML = `
       <h1>Content Ideas</h1>
@@ -2230,6 +2320,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 
   function ideaCard(it, st) {
     return `<button class="idea" type="button" data-idea="${it.id}">
+      ${coverHtml(it)}
       <span class="idea-top"><span>${esc(it.fmt)}</span><span class="dotsep"></span><span>${seriesWord(it)}</span>${it.email ? '<span class="dotsep"></span><span>Email idea</span>' : ''}</span>
       <span class="idea-t">${esc(it.t)}</span>
       <span class="idea-p">${esc(it.pitch)}</span>
@@ -2279,12 +2370,16 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
         <header class="ith-h"><h2>${esc(th.name)}</h2><span class="lbl">${plural(list.length, 'idea')} · Slides ${esc(th.slides)}</span></header>
         <div class="igrid">${list.map(x => ideaCard(x.it, x.st)).join('')}</div>
       </section>`).join('') : `<div class="empty-state"><p>No ideas match.</p><button class="btn" data-ideas-clear>${ic('reset')}Show all ideas</button></div>`)
-      + (filtered ? '' : budgetHtml() + `
+      + (filtered ? '' : `
+      ${MEDIA().boards.length ? `<section class="ith boards">
+        <header class="ith-h"><h2>Reference boards</h2><span class="lbl">Images only · Slides 75–80</span></header>
+        <div class="bgrid">${MEDIA().boards.map((b, k) => `<button class="ifig" data-lightbox="boards" data-k="${k}" aria-label="Slide ${b.slide}, open larger">${imgTag(b)}<span class="cap">Slide ${esc(b.slide)}${b.t ? ` · ${esc(b.t)}` : ''}</span></button>`).join('')}</div>
+      </section>` : ''}
       <section class="ith shots">
         <header class="ith-h"><h2>Shoot list</h2><span class="lbl">What to commission · Slides 72–74</span></header>
         <div class="shot-cols">${(IDEAS.shots || []).map(s => `<div class="shot"><h3>${esc(s.name)}</h3><p class="lbl">${esc(s.sub)} · Slide ${esc(s.slide)}</p><ul>${s.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
-        ${IDEAS.boards ? `<p class="boards">${esc(IDEAS.boards)}</p>` : ''}
-      </section>`);
+      </section>` + budgetHtml());
+    hydrateImages($('#ideas'));
   }
 
   function renderIdeaDrawer(it) {
@@ -2295,6 +2390,8 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     let body = sec('On the production timeline', st.rs.length
       ? `<div class="ip-list">${st.rs.map(r => `<button class="ip-row" data-open="${r.id}">${stIcon(r.a.state)}<span class="t">${esc(r.t)}</span><span class="d ${r.a.state === 'red' ? 'red' : ''}">${postWord(r)}</span>${ic('chevR', 'sm')}</button>`).join('')}</div>`
       : '<p class="notes">Not on the production timeline yet.</p>');
+    const media = ideaMedia(it);
+    if (media.length) body += sec(`From the deck<span class="lbl" style="color:var(--ink-4)">${plural(media.length, 'image')}</span>`, `<div class="igal">${media.map((m, k) => `<button class="ifig ${m.cap ? 'is-slide' : ''}" data-lightbox="${it.id}" data-k="${k}" aria-label="${esc(m.cap || `Image ${k + 1}`)}, open larger">${imgTag(m)}${m.cap ? `<span class="cap">${esc(m.cap)}</span>` : ''}</button>`).join('')}</div>`);
     body += sec('The idea', `<p class="notes">${esc(it.desc)}</p>`);
     if (it.goal) body += sec('What it does for Atlas', `<p class="notes">${esc(it.goal)}</p>`);
     const rows = [['Made by', it.who], ['Lift', it.lift], ['Next step', it.next], ['Deck timing', it.timing]].filter(x => x[1]);
@@ -2311,6 +2408,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       </div>
       <div class="dr-b">${body}</div>
       <div class="dr-f"><span class="src">${ic('note')}<span class="r">${esc(IDEAS.source ? IDEAS.source.name : 'Content Doc')} · slide ${esc(it.slide)}</span></span></div>`;
+    hydrateImages($('#drawer'));
   }
 
   // ── Drawer ─────────────────────────────────────────────────────────────
@@ -2559,6 +2657,12 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   document.addEventListener('click', e => {
     const t = e.target;
     let el;
+    if (LB) {
+      if ((el = t.closest('[data-lb]'))) return stepLightbox(Number(el.dataset.lb));
+      if (!t.closest('.lightbox img')) closeLightbox();
+      return;
+    }
+    if ((el = t.closest('[data-lightbox]'))) return openLightbox(el.dataset.lightbox, el.dataset.k);
     if ((el = t.closest('.tab'))) return setView(el.dataset.view);
     if ((el = t.closest('[data-viewas]'))) {
       S.preview = el.dataset.viewas === 'team';
@@ -2720,6 +2824,12 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 
   document.addEventListener('keydown', e => {
     const typing = e.target.closest('input, textarea, select, [contenteditable]');
+    if (LB) {
+      if (e.key === 'Escape') { e.preventDefault(); return closeLightbox(); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); return stepLightbox(e.key === 'ArrowLeft' ? -1 : 1); }
+      if (e.key === 'Tab') { e.preventDefault(); const f = $$('#lightbox button'); const i = f.indexOf(document.activeElement); (f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length] || f[0]).focus(); }
+      return;
+    }
     if (e.key === 'Escape') {
       if (!pop.hidden) return closePop();
       if (S.sel) return closeDrawer();
@@ -3290,6 +3400,18 @@ async function signOut() {
   location.replace(location.pathname);
 }
 
+// Deck images live in the private bucket (hq-private/ideas/). Signed links last 12 hours; refresh them after 11.
+const imgCache = {};
+async function imgUrls(files) {
+  const now = Date.now();
+  const need = files.filter(f => !imgCache[f] || now - imgCache[f].at > 11 * 3600e3);
+  if (need.length) {
+    const req = sb.storage.from(CFG.bucket).createSignedUrls(need.map(f => 'ideas/' + f), 12 * 3600);
+    need.forEach(f => { imgCache[f] = { at: now, url: req.then(({ data }) => ((data || []).find(x => x.path === 'ideas/' + f) || {}).signedUrl || null) }; });
+  }
+  return Object.fromEntries(await Promise.all(files.map(async f => [f, await imgCache[f].url])));
+}
+
 const LIVE = {
   get me() { return me; },
   get(k, d) { return k in shared && shared[k] !== undefined ? clone(shared[k]) : d; },
@@ -3299,6 +3421,7 @@ const LIVE = {
     timers[k] = setTimeout(() => saveShared(k), 450);
   },
   publishTeam,
+  imgUrls,
   connect(hooks) { app = hooks; subscribe(); },
   openAdmin,
   signOut
