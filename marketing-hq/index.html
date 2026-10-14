@@ -608,8 +608,7 @@ main { flex: 1; min-height: 0; position: relative; }
 /* the board: one lane per channel (TL;DR tile, sticky header, cards). Lanes in a row share a
    subgrid, so tiles and headers line up even when the TL;DRs differ in length. */
 .lane-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(212px, 1fr); grid-template-rows: auto auto 1fr; }
-.board.two .lane-row { grid-template-columns: repeat(var(--per), minmax(0, 1fr)); grid-auto-columns: minmax(0, 1fr); }
-.board.two .lane-row + .lane-row { border-top: 1px solid var(--line-3); }
+.board.calm .lane-row { grid-auto-columns: minmax(272px, 1fr); }
 .lane { grid-row: span 3; display: grid; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); min-width: 0; border-right: 1px solid var(--line); scroll-snap-align: start; }
 
 /* TL;DR tile at the top of each lane */
@@ -661,10 +660,11 @@ main { flex: 1; min-height: 0; position: relative; }
 .col-h .headline { margin-top: 10px; font-size: 12px; line-height: 1.45; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 4.35em; }
 .col-h .headline .lbl { color: var(--ink); margin-right: 4px; }
 .col-b { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-.col-b > .grp { margin: 6px 2px 0; display: flex; align-items: baseline; gap: 8px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
-.col-b > .grp:first-child { margin-top: 2px; }
-.col-b > .grp b { font-weight: 400; color: var(--ink-4); }
-.col-b > .grp::after { content: ''; flex: 1; height: 1px; background: var(--line); transform: translateY(-3px); }
+.col-b .grp { margin: 6px 2px 0; display: flex; align-items: baseline; gap: 8px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+.col-b .grp:first-child { margin-top: 2px; }
+.upds > .grp { margin-bottom: 4px; }
+.col-b .grp b { font-weight: 400; color: var(--ink-4); }
+.col-b .grp::after { content: ''; flex: 1; height: 1px; background: var(--line); transform: translateY(-3px); }
 .lane-more { align-self: stretch; height: 32px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--r); border: 1px dashed var(--line-2); font: 400 10px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); transition: color 140ms, border-color 140ms; }
 .lane-more:hover { color: var(--ink); border-color: var(--line-3); }
 .lane-more .i { width: 12px; height: 12px; }
@@ -699,6 +699,60 @@ main { flex: 1; min-height: 0; position: relative; }
 .kind-seg label:has(input:checked) { background: var(--s3); color: var(--ink); }
 .kind-seg label:has(input:focus-visible) { outline: 2px solid var(--ink-3); outline-offset: 1px; }
 .kind-seg input { position: absolute; opacity: 0; width: 0; height: 0; }
+/* ── Calm board (Private view) ── */
+.pulse[hidden] { display: none; }
+.st-tile.calm { gap: 10px; }
+.st-tile .nx { margin: 0; padding-top: 10px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 8px; align-items: baseline; font-size: 12px; line-height: 1.45; color: var(--ink-2); }
+.st-tile .nx .k { font: 400 9.5px/1.3 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.st-tile .nx .mono { font: 400 11px/1.3 var(--f-mono); color: var(--ink); }
+.upds { display: flex; flex-direction: column; margin-bottom: 6px; }
+.upd { border-top: 1px solid var(--line); }
+.upds > .grp + .upd { border-top: 0; }
+.upd summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 5px minmax(0, 1fr) 12px; gap: 9px; align-items: start; padding: 8px 2px 8px 4px; }
+.upd summary::-webkit-details-marker { display: none; }
+.upd summary::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--ch, var(--ink-4)); opacity: 0.7; margin-top: 7px; }
+.upd .ut { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+.upd .ud { font: 400 10px/1 var(--f-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.upd summary > .i { width: 12px; height: 12px; margin-top: 3px; color: var(--ink-4); opacity: 0; transition: opacity 140ms, transform 200ms var(--ease); }
+.upd summary:hover .ut, .upd[open] .ut { color: var(--ink); }
+.upd summary:hover > .i, .upd[open] summary > .i, .upd summary:focus-visible > .i { opacity: 1; }
+.upd[open] summary > .i { transform: rotate(180deg); }
+@media (hover: none) { .upd summary > .i { opacity: 1; } }
+.upd > .body { padding: 0 2px 12px 18px; }
+.tdc { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px 10px 10px 10px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--s1); transition: border-color 160ms, opacity 200ms; }
+.tdc:hover, .tdc:has(details[open]) { border-color: var(--line-3); }
+.tdc summary { list-style: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; }
+.tdc summary::-webkit-details-marker { display: none; }
+.tdc .t { font-size: 13px; line-height: 1.38; color: var(--ink); font-weight: 450; }
+.tdc .m { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; font: 400 9.5px/1.5 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.tdc .m .hot { color: var(--red-ink); }
+.tdc .m .i { width: 11px; height: 11px; vertical-align: -1px; }
+.tdc .dot-sep { color: var(--ink-4); }
+.tdc.done { opacity: 0.55; }
+.tdc.done .t { text-decoration: line-through; text-decoration-color: var(--line-3); }
+.tdc.done .td-check { color: var(--good-ink); box-shadow: inset 0 0 0 1.25px var(--good); }
+.tdc.arrived { animation: arrive 900ms var(--ease); }
+.tdc > details > .body { margin-top: 10px; }
+.bang { display: inline-grid; place-items: center; width: 15px; height: 15px; margin-right: 7px; border-radius: 50%; background: var(--red); color: #fff; font: 600 10.5px/1 var(--f-body); vertical-align: 1px; }
+:is(.tdc, .upd) .body { display: flex; flex-direction: column; gap: 8px; }
+:is(.tdc, .upd) .cd { font-size: 12px; line-height: 1.45; color: var(--ink-2); }
+:is(.tdc, .upd) .impact { font-size: 11.5px; line-height: 1.4; color: var(--ink-2); display: flex; gap: 6px; }
+:is(.tdc, .upd) .impact .i { margin-top: 1px; color: var(--ink-3); width: 13px; height: 13px; flex: none; }
+:is(.tdc, .upd) .linked { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink); text-align: left; }
+:is(.tdc, .upd) .linked .i { color: var(--ink-3); width: 12px; height: 12px; }
+:is(.tdc, .upd) .linked:hover span { text-decoration: underline; text-underline-offset: 3px; }
+:is(.tdc, .upd) .priv { gap: 8px; padding: 9px 10px; }
+:is(.tdc, .upd) .foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 8px; }
+:is(.tdc, .upd) .foot .acts { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+.btn.sm .i { width: 12px; height: 12px; }
+.td-t .bang { width: 14px; height: 14px; font-size: 10px; margin-right: 6px; }
+.q-kind { align-self: flex-start; display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: 999px; border: 1px solid var(--line-2); font: 400 9px/1 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.q-kind.upd { border-style: dashed; }
+.q-kind.close { color: var(--good-ink); border-color: color-mix(in srgb, var(--good) 45%, transparent); }
+.q-closes { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; line-height: 1.4; color: var(--ink-2); }
+.q-closes .i { width: 12px; height: 12px; margin-top: 2px; color: var(--good-ink); flex: none; }
+.add-form .date-r { align-items: center; gap: 8px; font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.add-form .date-r > span { flex: none; }
 .col-empty { padding: 18px 10px; color: var(--ink-3); font-size: 12px; line-height: 1.5; text-align: center; border: 1px dashed var(--line-2); border-radius: var(--r); }
 .card {
   border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--s1);
@@ -1195,7 +1249,6 @@ img.broken { visibility: hidden; }
   .board { display: grid; grid-auto-flow: column; grid-auto-columns: 86vw; grid-template-rows: auto auto 1fr; }
   .board .lane-row { display: contents; }
   .lane { border-right: 1px solid var(--line) !important; }
-  .rows-seg { display: none; }
   .todo-list { padding: 14px 16px 12px; width: 100vw; }
   .todo-cols { grid-template-columns: 1fr; gap: 14px; }
   .td-col h3 .hint { display: none; }
@@ -1588,8 +1641,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     actFilter: 'open',
     queueOpen: store.get('queueOpen', window.innerWidth >= 1680),
     todoOpen: store.get('todoOpen', true),
-    actRows: store.get('actRows', 2),
-    lanesOpen: new Set(),
+    showDone: store.get('showDone', false),
     ideasShut: store.get('ideasShut', {}),
     todoAll: false,
     openCards: new Set(),
@@ -1819,11 +1871,14 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     $$('[data-theme-set]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeSet === th)));
   }
 
+  // The content-schedule bar (can't post, at risk, next post) lives on the timeline tab only.
   function renderPulse() {
+    const onTl = S.view === 'timeline';
+    $('#pulse').hidden = !onTl;
+    if (!onTl) { if (S.focus) S.focus = null; return; }
     const items = Object.values(R);
     const red = items.filter(r => r.a.state === 'red').length;
     const amber = items.filter(r => r.a.state === 'amber').length;
-    const waiting = ACTS.filter(a => a.state === 'approved' && (a.status === 'waiting' || a.status === 'blocked')).length;
     const upcoming = items.filter(r => r.a.g.post != null && r.a.g.post >= TODAY && r.a.state !== 'live').sort((a, b) => a.a.g.post - b.a.g.post);
     const nxt = upcoming[0];
     const wk = mondayOf(TODAY);
@@ -1832,7 +1887,6 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       <span class="sep"></span>
       <button class="chip red" data-focus="red" aria-pressed="${S.focus === 'red'}"><span class="pip"></span><b>${red}</b> can't post or slipped</button>
       <button class="chip amber" data-focus="amber" aria-pressed="${S.focus === 'amber'}"><span class="pip"></span><b>${amber}</b> at risk</button>
-      <button class="chip wait" data-focus="waiting" aria-pressed="${S.focus === 'waiting'}"><span class="pip"></span><b>${waiting}</b> waiting on people</button>
       ${nxt ? `<div class="next"><span class="orb"></span><span class="lbl">Next post</span><span>${fw(nxt.a.g.post)} · <a data-open="${nxt.id}">${esc(nxt.t)}</a>${nxt.a.state === 'red' ? ` <span style="color:var(--red-ink)">(can't make it)</span>` : ''}</span></div>` : ''}`;
   }
 
@@ -2169,8 +2223,8 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     $('#tb-activity').innerHTML = `
       <h1>Activity</h1>
       ${searchBox('q-activity')}
-      <div class="seg" role="group" aria-label="Show"><button data-actf="open" aria-pressed="${f2 === 'open'}">Open</button><button data-actf="blocked" aria-pressed="${f2 === 'blocked'}">Blocked</button><button data-actf="waiting" aria-pressed="${f2 === 'waiting'}">Waiting</button><button data-actf="all" aria-pressed="${f2 === 'all'}">All</button></div>
-      <div class="seg rows-seg" role="group" aria-label="Board layout"><button data-rows="1" aria-pressed="${S.actRows === 1}" title="All channels side by side">1 row</button><button data-rows="2" aria-pressed="${S.actRows === 2}" title="Channels in two rows, wider columns">2 rows</button></div>
+      ${CALM() ? `<button class="icon-btn" data-show-done aria-pressed="${S.showDone}" title="${S.showDone ? 'Hide' : 'Show'} the to-dos you've finished">${ic('check')}${S.showDone ? 'Hide done' : 'Show done'}</button>`
+        : `<div class="seg" role="group" aria-label="Show"><button data-actf="open" aria-pressed="${f2 === 'open'}">Open</button><button data-actf="blocked" aria-pressed="${f2 === 'blocked'}">Blocked</button><button data-actf="waiting" aria-pressed="${f2 === 'waiting'}">Waiting</button><button data-actf="all" aria-pressed="${f2 === 'all'}">All</button></div>`}
       <span class="grow"></span>
       <button class="icon-btn" data-export>${ic('download')}Export</button>`;
   }
@@ -2230,9 +2284,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 
   function addForm(c) {
     return `<form class="add-form" data-add-form="${c.id}">
-      <div class="seg kind-seg" role="radiogroup" aria-label="Type"><label><input type="radio" name="kind" value="action" checked>Action</label><label><input type="radio" name="kind" value="idea">Idea</label></div>
-      <input name="title" placeholder="What needs to happen? Or the idea's name" required aria-label="Title">
-      <div class="r"><select name="status" aria-label="Status">${Object.keys(STATUS_LABEL).filter(s => s !== 'done').map(s => `<option value="${s}" ${s === 'todo' ? 'selected' : ''}>${STATUS_LABEL[s]}</option>`).join('')}</select><input name="due" type="date" aria-label="Due date"></div>
+      <div class="seg kind-seg" role="radiogroup" aria-label="Type"><label><input type="radio" name="kind" value="action" checked>To-do</label><label><input type="radio" name="kind" value="update">Update</label><label><input type="radio" name="kind" value="idea">Idea</label></div>
+      <input name="title" placeholder="What needs to happen? Or the update, or the idea" required aria-label="Title">
+      <label class="r date-r"><span>Date</span><input name="due" type="date" aria-label="Date (due, or when it happens)"></label>
       <div class="r"><input name="owner" placeholder="Owner" aria-label="Owner" value="Zoe"><input name="wait" placeholder="Waiting on" aria-label="Waiting on"></div>
       <select name="vis" aria-label="Who can see it"><option value="team">Visible to the team</option><option value="private">Only me</option></select>
       <select name="link" aria-label="Affects content"><option value="">Affects no content item</option>${BASE.filter(i => i.ch === c.id).map(i => `<option value="${i.id}">${esc(i.t)}</option>`).join('')}</select>
@@ -2240,8 +2294,6 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     </form>`;
   }
 
-  // Two rows: each column shows its first LANE_LIMIT cards, so the second row stays in reach.
-  const LANE_LIMIT = 5;
   function ideaHtml(a) {
     const link = a.site && a.site.url ? `<a class="open-src" href="${esc(a.site.url)}" target="_blank" rel="noopener">${esc(a.site.t || 'Website')} ${ic('link')}</a>` : '';
     return `<details class="idea-card" data-act="${a.id}" data-more="${a.id}"${S.openCards.has(a.id) ? ' open' : ''}>
@@ -2249,49 +2301,113 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       <div class="ib">${a.detail ? `<p class="id">${esc(a.detail)}</p>` : ''}${link || PRIV() ? `<div class="if">${link}${PRIV() ? `<div class="acts"><button class="mini" data-remove="${a.id}" aria-label="Remove idea" title="Remove">${ic('x')}</button></div>` : ''}</div>` : ''}</div>
     </details>`;
   }
-  function laneHtml(c, approved, two) {
+  // Team view: the full cards with status labels, one column per channel.
+  function laneHtml(c, approved) {
     const all = approved.filter(a => a.cat === c.id);
     const ideas = all.filter(isIdea).filter(qMatch);
     const acts = all.filter(a => !isIdea(a));
     const groups = [...new Set(acts.map(a => a.group).filter(Boolean))];
     const gi = a => a.group ? groups.indexOf(a.group) : groups.length;
     const list = acts.filter(actMatches).sort((a, b) => gi(a) - gi(b) || STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || (dn(a.due) ?? 1e9) - (dn(b.due) ?? 1e9));
-    const capped = two && !S.lanesOpen.has(c.id) && list.length > LANE_LIMIT + 1;
-    const shown = capped ? list.slice(0, LANE_LIMIT) : list;
     let cards = '', last;
-    shown.forEach(a => {
+    list.forEach(a => {
       const g = groups.length ? a.group || 'Other' : null;
-      if (g && g !== last) { cards += `<h3 class="grp">${esc(g)}<b>${list.filter(x => (x.group || 'Other') === g).length}</b></h3>`; last = g; }
+      if (g && g !== last) { cards += `<h3 class="grp">${esc(g)}</h3>`; last = g; }
       cards += cardHtml(a);
     });
-    const more = capped ? `<button class="lane-more" data-lane-more="${c.id}">${ic('chevD', 'sm')}Show ${list.length - LANE_LIMIT} more</button>`
-      : two && list.length > LANE_LIMIT + 1 ? `<button class="lane-more" data-lane-more="${c.id}">${ic('chevU', 'sm')}Show fewer</button>` : '';
-    const showIdeas = ideas.length && S.actFilter !== 'blocked' && S.actFilter !== 'waiting' && S.focus !== 'waiting';
-    const shut = !!S.ideasShut[c.id];
-    const ideasBlock = showIdeas ? `<section class="ideas-sec ${shut ? 'shut' : ''}" data-ch="${c.id}" aria-label="${esc(c.name)} ideas">
-        <button class="ideas-h" data-ideas-toggle="${c.id}" aria-expanded="${!shut}">${ic('bulb', 'sm')}<span>Ideas</span><b>${ideas.length}</b>${ic(shut ? 'chevR' : 'chevD', 'sm')}</button>
-        ${shut ? '' : `<div class="ideas-list">${ideas.map(ideaHtml).join('')}</div>`}
-      </section>` : '';
-    const empty = !list.length ? `<div class="col-empty">${acts.length ? 'Nothing matches this filter.' : PRIV() ? 'Nothing here yet. Approve flagged items from the queue, or add one with +.' : 'Nothing logged yet.'}</div>` : '';
+    const showIdeas = ideas.length && S.actFilter !== 'blocked' && S.actFilter !== 'waiting';
+    const empty = !list.length ? `<div class="col-empty">${acts.length ? 'Nothing matches this filter.' : 'Nothing logged yet.'}</div>` : '';
     return `<section class="col lane" data-col="${c.id}" aria-label="${esc(c.name)}">
       ${tileHtml(c, approved)}
       <div class="col-h" data-ch="${c.id}">
-        <div class="top-row"><span class="chdot"></span><span class="col-name">${esc(c.name)}</span><span class="col-n">${list.length} ${S.actFilter === 'all' ? 'cards' : S.actFilter}</span>${CAN_EDIT() ? `<button class="add" data-add="${c.id}" aria-label="Add to ${esc(c.name)}" title="Add an action or idea">${ic('plus')}</button>` : ''}</div>
+        <div class="top-row"><span class="chdot"></span><span class="col-name">${esc(c.name)}</span><span class="col-n">${list.length} ${S.actFilter === 'all' ? 'cards' : S.actFilter}</span></div>
       </div>
-      <div class="col-b">${S.addingIn === c.id && CAN_EDIT() ? addForm(c) : ''}${cards}${empty}${more}${ideasBlock}</div>
+      <div class="col-b">${cards}${empty}${showIdeas ? ideasHtml(c, ideas) : ''}</div>
+    </section>`;
+  }
+  function ideasHtml(c, ideas) {
+    const shut = !!S.ideasShut[c.id];
+    return `<section class="ideas-sec ${shut ? 'shut' : ''}" data-ch="${c.id}" aria-label="${esc(c.name)} ideas">
+        <button class="ideas-h" data-ideas-toggle="${c.id}" aria-expanded="${!shut}">${ic('bulb', 'sm')}<span>Ideas</span>${ic(shut ? 'chevR' : 'chevD', 'sm')}</button>
+        ${shut ? '' : `<div class="ideas-list">${ideas.map(ideaHtml).join('')}</div>`}
+      </section>`;
+  }
+
+  // Private view: the calm board. Each column runs summary → updates → to-dos → ideas.
+  // skip the date chip when the text already says it (e.g. "Oct 15–16")
+  const dateIn = (t, k) => k != null && String(t).includes(MON[ud(k).getUTCMonth()]) && new RegExp(`\\b${ud(k).getUTCDate()}\\b`).test(t);
+  function moreBody(a, actions) {
+    const links = (a.links || []).filter(id => R[id]);
+    const firstLink = links[0] && R[links[0]];
+    const priv = (a.src && a.src.quote) || a.pnote || (a.refs || []).length;
+    return `<div class="body">
+      ${a.detail ? `<div class="cd">${esc(a.detail)}</div>` : ''}
+      ${a.impact ? `<div class="impact">${ic('arrow')}<span>${esc(a.impact)}</span></div>` : ''}
+      ${firstLink ? `<button class="linked" data-open="${firstLink.id}">${ic('gantt')}<span>${esc(firstLink.t)}${links.length > 1 ? ` + ${links.length - 1} more` : ''}</span>${stIcon(firstLink.a.state)}</button>` : ''}
+      ${priv ? `<div class="priv"><div class="priv-h">${ic('lock')}Only you</div>${a.src && a.src.quote ? `<div class="quote">${esc(a.src.quote)}</div>` : ''}${a.pnote ? `<div class="pnote">${esc(a.pnote)}</div>` : ''}${refsHtml(a)}</div>` : ''}
+      <div class="foot">${visChip(a)}${srcLink(a.src)}<div class="acts">${actions}</div></div>
+    </div>`;
+  }
+  function updHtml(a) {
+    const d = dn(a.due);
+    return `<details class="upd" data-act="${a.id}" data-more="${a.id}"${S.openCards.has(a.id) ? ' open' : ''}>
+      <summary><span class="ut">${esc(a.title)}${d != null && !dateIn(a.title, d) ? ` <span class="ud">${fw(d)}</span>` : ''}</span>${ic('chevD', 'sm')}</summary>
+      ${moreBody(a, `<button class="btn sm" data-make-todo="${a.id}" title="Move it to this column's to-dos">${ic('plus', 'sm')}Make it a to-do</button><button class="mini" data-remove="${a.id}" aria-label="Clear this update" title="Clear">${ic('x')}</button>`)}
+    </details>`;
+  }
+  function todoHtml(a) {
+    const d = dn(a.due), done = a.status === 'done', hot = urgent(a);
+    const other = a.owner && !/\b(zoe|atlas)\b/i.test(a.owner) ? shortWho(a.owner) : '';
+    const meta = [
+      a.wait ? `Waiting on ${esc(shortWho(a.wait))}` : other ? esc(other) : '',
+      d != null ? `<span class="${hot ? 'hot' : ''}">${d < TODAY && !done ? 'Overdue · ' : ''}${fw(d)}</span>` : '',
+      a.vis === 'private' ? `<span title="Only you">${ic('lock', 'sm')}</span>` : ''
+    ].filter(Boolean).join('<span class="dot-sep">·</span>');
+    return `<article class="tdc ${done ? 'done' : ''} ${hot ? 'hot' : ''} ${S.flash === a.id ? 'arrived' : ''}" data-act="${a.id}">
+      <button class="td-check" data-done="${a.id}" aria-label="${done ? 'Reopen' : 'Mark done'}: ${esc(a.title)}" title="${done ? 'Reopen' : 'Mark done'}">${ic(done ? 'reset' : 'check')}</button>
+      <details data-more="${a.id}"${S.openCards.has(a.id) ? ' open' : ''}>
+        <summary><span class="t">${hot ? '<span class="bang" aria-label="Needs you now">!</span>' : ''}${esc(a.title)}</span>${meta ? `<span class="m">${meta}</span>` : ''}</summary>
+        ${moreBody(a, `<button class="btn sm" data-keep-upd="${a.id}" title="Not a task: keep it in this column as an update">Keep as update</button><button class="mini" data-remove="${a.id}" aria-label="Remove" title="Remove">${ic('x')}</button>`)}
+      </details>
+    </article>`;
+  }
+  function calmLaneHtml(c, approved) {
+    const all = approved.filter(a => a.cat === c.id);
+    const ideas = all.filter(isIdea).filter(qMatch);
+    const upds = all.filter(a => isUpd(a) && isCurrent(a) && qMatch(a))
+      .sort((a, b) => (dn(a.due) ?? 1e9) - (dn(b.due) ?? 1e9));
+    const todos = all.filter(a => isTodo(a) && qMatch(a) && (S.showDone || a.status !== 'done'));
+    const groups = [...new Set(todos.map(a => a.group).filter(Boolean))];
+    const gi = a => a.group ? groups.indexOf(a.group) : groups.length;
+    todos.sort((a, b) => gi(a) - gi(b) || (a.status === 'done') - (b.status === 'done') || (dn(a.due) ?? 1e9) - (dn(b.due) ?? 1e9));
+    let list = '', last;
+    todos.forEach(a => {
+      const g = groups.length ? a.group || 'Other to-dos' : 'To-dos';
+      if (g !== last) { list += `<h3 class="grp">${esc(g)}</h3>`; last = g; }
+      list += todoHtml(a);
+    });
+    const nothing = !upds.length && !todos.length && !ideas.length;
+    return `<section class="col lane calm" data-col="${c.id}" aria-label="${esc(c.name)}">
+      ${tileHtml(c, approved)}
+      <div class="col-h" data-ch="${c.id}">
+        <div class="top-row"><span class="chdot"></span><span class="col-name">${esc(c.name)}</span>${CAN_EDIT() ? `<button class="add" data-add="${c.id}" aria-label="Add to ${esc(c.name)}" title="Add a to-do, update or idea">${ic('plus')}</button>` : ''}</div>
+      </div>
+      <div class="col-b">
+        ${S.addingIn === c.id && CAN_EDIT() ? addForm(c) : ''}
+        ${upds.length ? `<section class="upds" aria-label="${esc(c.name)} updates"><h3 class="grp">Updates</h3>${upds.map(updHtml).join('')}</section>` : ''}
+        ${list}
+        ${nothing ? `<div class="col-empty">${S.q ? 'Nothing matches the search.' : 'Nothing here yet. Approve flagged items from the queue, or add one with +.'}</div>` : ''}
+        ${ideas.length ? ideasHtml(c, ideas) : ''}
+      </div>
     </section>`;
   }
   function renderActivity() {
     renderActivityToolbar();
     const approved = ACTS.filter(a => a.state === 'approved' || a.state === 'completed');
-    const two = S.actRows === 2;
-    const chs = DATA.channels;
-    const per = two ? Math.ceil(chs.length / 2) : chs.length;
-    const rows = two ? [chs.slice(0, per), chs.slice(per)] : [chs];
+    const order = CALM() && DATA.activityOrder ? DATA.activityOrder.map(id => CH[id]).filter(Boolean) : DATA.channels;
     const board = $('#cols');
-    board.className = `board ${two ? 'two' : 'one'}`;
-    board.style.setProperty('--per', per);
-    board.innerHTML = rows.filter(r => r.length).map(r => `<div class="lane-row">${r.map(c => laneHtml(c, approved, two)).join('')}</div>`).join('');
+    board.className = `board ${CALM() ? 'calm' : ''}`;
+    board.innerHTML = `<div class="lane-row">${order.map(c => CALM() ? calmLaneHtml(c, approved) : laneHtml(c, approved)).join('')}</div>`;
     renderTodo();
     $('.act').classList.toggle('q-closed', !S.queueOpen);
     $('.act').classList.toggle('no-queue', !PRIV());
@@ -2301,48 +2417,53 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 
   // ── Your to-do list (Private view only): every open item you own, across all channels ──
   const isIdea = a => a.kind === 'idea';
+  // Private view is the calm board: updates and to-dos kept apart, red only for what needs you now.
+  // Team view keeps the full cards with status labels.
+  const CALM = () => PRIV();
+  const isUpd = a => !!a.upd && !isIdea(a);
+  const isTodo = a => !isIdea(a) && !a.upd;
+  const urgent = a => a.status !== 'done' && dn(a.due) != null && dn(a.due) <= TODAY + 2;
+  const isCurrent = a => isUpd(a) ? dn(a.due) == null || dn(a.due) >= TODAY : true;   // dated updates drop off once their date has passed
   const isMine = a => /\b(zoe|atlas)\b/i.test(a.owner || '') || (a.origin === 'manual' && !a.owner);
   const chasing = a => (a.status === 'waiting' || a.status === 'blocked') && !!a.wait;
   function renderTodo() {
     const el = $('#todo');
     if (!PRIV()) { el.hidden = true; el.innerHTML = ''; return; }
     el.hidden = false;
-    const mine = ACTS.filter(a => a.state === 'approved' && a.status !== 'done' && !isIdea(a) && isMine(a) && qMatch(a));
+    const mine = ACTS.filter(a => a.state === 'approved' && a.status !== 'done' && isTodo(a) && isMine(a) && qMatch(a));
     const key = a => { const d = dn(a.due); return [d != null && d < TODAY ? 0 : 1, d ?? 1e9, STATUS_ORDER[a.status]]; };
     const by = (x, y) => { const a = key(x), b = key(y); return a[0] - b[0] || a[1] - b[1] || a[2] - b[2]; };
     const doNow = mine.filter(a => !chasing(a)).sort(by);
     const chase = mine.filter(chasing).sort(by);
-    const overdue = mine.filter(a => dn(a.due) != null && dn(a.due) < TODAY).length;
     const open = S.todoOpen;
     const LIMIT = 6;
     const row = a => {
       const d = dn(a.due), od = d != null && d < TODAY;
       const meta = [
         `<span class="td-ch" data-ch="${a.cat}"><span class="chdot"></span>${esc(CH[a.cat] ? CH[a.cat].name : a.cat)}</span>`,
-        chasing(a) ? `<span class="td-st ${a.status}">${a.status === 'blocked' ? 'Blocked · waiting on ' : 'Waiting on '}${esc(shortWho(a.wait))}</span>` : a.status === 'in_progress' ? '<span class="td-st">In progress</span>' : '',
+        chasing(a) ? `<span class="td-st">Waiting on ${esc(shortWho(a.wait))}</span>` : '',
         /^atlas$/i.test(a.owner || '') ? '<span class="td-st">Atlas</span>' : '',
         a.vis === 'private' ? `<span class="td-st" title="Only you">${ic('lock', 'sm')}</span>` : ''
       ].join('');
       return `<li class="td-row">
         <button class="td-check" data-done="${a.id}" aria-label="Mark done: ${esc(a.title)}" title="Mark done">${ic('check')}</button>
-        <div class="td-main"><button class="td-t" data-jump="${a.id}" title="Show it in ${esc(CH[a.cat] ? CH[a.cat].name : '')}">${esc(a.title)}</button><div class="td-meta">${meta}</div></div>
+        <div class="td-main"><button class="td-t" data-jump="${a.id}" title="Show it in ${esc(CH[a.cat] ? CH[a.cat].name : '')}">${urgent(a) ? '<span class="bang" aria-label="Needs you now">!</span>' : ''}${esc(a.title)}</button><div class="td-meta">${meta}</div></div>
         <span class="td-due ${od ? 'overdue' : ''}">${d != null ? `${od ? 'Overdue ' : ''}${f(d)}` : ''}</span>
       </li>`;
     };
-    const col = (title, hint, list) => `<section class="td-col"><h3><span>${title}</span><b>${list.length}</b><span class="hint">${hint}</span></h3>
+    const col = (title, hint, list) => `<section class="td-col"><h3><span>${title}</span><span class="hint">${hint}</span></h3>
       <ul>${(S.todoAll ? list : list.slice(0, LIMIT)).map(row).join('') || `<li class="td-empty">${S.q ? 'Nothing matches the search.' : 'Nothing here.'}</li>`}</ul></section>`;
     const more = Math.max(doNow.length, chase.length) > LIMIT;
     el.innerHTML = `<header class="todo-h">
         <button class="todo-toggle" data-todo-toggle aria-expanded="${open}">${ic(open ? 'chevD' : 'chevR')}<h2>Your to-do</h2></button>
-        <span class="lbl">${plural(mine.length, 'open item')} across ${plural(new Set(mine.map(a => a.cat)).size, 'channel')}${overdue ? ` · <b class="od">${overdue} overdue</b>` : ''}</span>
         <span class="only-you">${ic('lock', 'sm')}Only you</span>
       </header>
       ${open ? `<div class="todo-cols">${col('To do', 'Yours to move', doNow)}${col('Chasing', 'Waiting on someone else', chase)}</div>
-        ${more ? `<button class="td-more" data-todo-all>${S.todoAll ? 'Show fewer' : `Show all ${mine.length}`} ${ic(S.todoAll ? 'chevD' : 'chevR', 'sm')}</button>` : ''}` : ''}`;
+        ${more ? `<button class="td-more" data-todo-all>${S.todoAll ? 'Show fewer' : 'Show all'} ${ic(S.todoAll ? 'chevD' : 'chevR', 'sm')}</button>` : ''}` : ''}`;
   }
   function jumpTo(id) {
     let card = $(`#cols [data-act="${id}"]`);
-    if (!card) { const a = ACTS.find(x => x.id === id); if (a) S.lanesOpen.add(a.cat); S.actFilter = 'open'; S.q = ''; renderActivity(); card = $(`#cols [data-act="${id}"]`); }
+    if (!card) { S.actFilter = 'open'; S.q = ''; renderActivity(); card = $(`#cols [data-act="${id}"]`); }
     if (!card) return;
     card.scrollIntoView({ block: 'center', inline: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     card.classList.remove('arrived'); void card.offsetWidth; card.classList.add('arrived');
@@ -2379,6 +2500,15 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       const state = t.state && STATE_BADGE[t.state] ? t.state : st.state;
       const [label, icon] = STATE_BADGE[state];
       const editing = S.editingTldr === c.id && CAN_EDIT();
+      if (CALM()) return `<article class="st-tile calm" data-ch="${c.id}">
+        <header><span class="chdot"></span><h2>${esc(c.name)}</h2></header>
+        ${editing ? `<form class="tldr-form" data-tldr-form="${c.id}"><textarea name="text" rows="4" aria-label="${esc(c.name)} summary">${esc(t.text || '')}</textarea>
+          <input type="hidden" name="state" value="${esc(t.state || 'auto')}">
+          <div class="r"><button type="button" class="btn" data-tldr-cancel>Cancel</button><button class="btn primary" type="submit">Save</button></div></form>`
+          : `<p class="tldr">${t.text ? esc(t.text) : '<span class="empty">No summary yet.</span>'}${CAN_EDIT() ? `<button class="mini tldr-edit" data-tldr-edit="${c.id}" aria-label="Edit the ${esc(c.name)} summary" title="Edit summary">${ic('note')}</button>` : ''}</p>`}
+        ${st.next ? `<p class="nx"><span class="k">Next</span><span><span class="mono">${fw(st.next.d)}</span> · ${esc(st.next.t)}</span></p>` : ''}
+        ${upd != null ? `<footer><span class="${stale ? 'stale' : ''}">Updated ${f(upd)}${stale ? ' · may be stale' : ''}</span></footer>` : ''}
+      </article>`;
       const facts = [
         st.blocked.length ? `<div><dt>Blocked</dt><dd>${esc(st.blocked[0].title)}${st.blocked.length > 1 ? ` <span class="more-n">+${st.blocked.length - 1}</span>` : ''}</dd></div>` : '',
         st.people.length ? `<div><dt>Waiting on</dt><dd>${esc(st.people.slice(0, 4).join(', '))}${st.people.length > 4 ? ` +${st.people.length - 4}` : ''}</dd></div>` : '',
@@ -2408,7 +2538,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       <button class="q-rail" data-queue-toggle aria-label="Show the flagged queue (${pending.length})" aria-expanded="false"><span class="spark">${ic('spark')}</span>${pending.length ? `<span class="n">${pending.length}</span>` : ''}<span class="vt">Flagged by Claude</span></button>
       <div class="q-h">
         <div class="tl"><span class="spark">${ic('spark')}</span><h2>Flagged by Claude</h2>${pending.length ? `<span class="n">${pending.length}</span>` : ''}<button class="mini" data-queue-toggle aria-label="Hide the queue" aria-expanded="true" title="Hide the queue">${ic('chevR')}</button></div>
-        <p>New action items from Gmail, Granola and Slack. <b>Approve</b> adds it to its column, <b>Completed</b> logs it as already handled, and <b>Deny</b> means it isn't needed. Anything from a DM starts as Only you.</p>
+        <p>New to-dos and updates from Gmail, Granola and Slack, scanned weekdays at 8am and 5pm. <b>Approve</b> adds it to its column, <b>Done</b> logs it as already handled, and <b>Deny</b> means it isn't needed. Anything from a DM starts as Only you.</p>
         <div class="scans">${scans}</div>
       </div>
       <div class="q-list">${pending.length ? pending.map(a => `
@@ -2418,12 +2548,14 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
             ${a.due ? `<span class="pill date ${dn(a.due) < TODAY ? 'overdue' : ''}">${dn(a.due) < TODAY ? 'Overdue · ' : 'Due '}${f(dn(a.due))}</span>` : ''}
             <span class="conf">${esc(a.conf || '')} confidence</span>
           </div>
+          <span class="q-kind ${a.closes ? 'close' : a.upd ? 'upd' : ''}">${a.closes ? 'Mark a to-do done' : a.upd ? 'Update' : 'To-do'}</span>
           <div class="ct">${esc(a.title)}</div>
+          ${a.closes && ACTS.find(x => x.id === a.closes) ? `<div class="q-closes">${ic('check', 'sm')}<span>${esc(ACTS.find(x => x.id === a.closes).title)}</span></div>` : ''}
           ${a.detail ? `<div class="cd">${esc(a.detail)}</div>` : ''}
           ${a.src && a.src.quote ? `<div class="quote">${esc(a.src.quote)}</div>` : ''}
           ${srcLine(a.src, true)}
           <div class="q-vis"><span class="lbl">Who sees it</span><div class="seg vis-seg" role="group" aria-label="Who can see it"><button data-qvis="${a.id}" data-v="team" aria-pressed="${a.vis === 'team'}">${ic('users', 'sm')}Team</button><button data-qvis="${a.id}" data-v="private" aria-pressed="${a.vis !== 'team'}">${ic('lock', 'sm')}Only you</button></div></div>
-          <div class="q-acts"><button class="btn" data-deny="${a.id}" title="Not needed. Claude won't suggest it again.">Deny <kbd>D</kbd></button><button class="btn" data-complete="${a.id}" title="Already taken care of. Logged as done.">${ic('check')}Done <kbd>C</kbd></button><button class="btn primary" data-approve="${a.id}" title="Add it to its column">Approve <kbd>A</kbd></button></div>
+          <div class="q-acts"><button class="btn" data-deny="${a.id}" title="Not needed. Claude won't suggest it again.">${a.closes ? 'Not yet' : 'Deny'} <kbd>D</kbd></button>${a.closes || a.upd ? '' : `<button class="btn" data-complete="${a.id}" title="Already taken care of. Logged as done.">${ic('check')}Done <kbd>C</kbd></button>`}<button class="btn primary" data-approve="${a.id}" title="${a.closes ? 'Mark that to-do done' : 'Add it to its column'}">${a.closes ? 'Mark done' : 'Approve'} <kbd>A</kbd></button></div>
         </article>`).join('') : `<div class="q-empty"><div class="disp">All clear</div>The queue is empty. New items appear here after each scan.</div>`}</div>
       ${denied.length ? `<div class="q-foot"><button data-toggle-denied>${ic(showDenied ? 'chevD' : 'chevR')}${plural(denied.length, 'denied item')}</button></div>
         ${showDenied ? `<div class="denied-list">${denied.map(a => `<div class="dn-row"><span>${esc(a.title)}</span><button class="mini" data-undeny="${a.id}" title="Move back to the queue" aria-label="Move back to the queue">${ic('reset')}</button></div>`).join('')}</div>` : ''}` : ''}`;
@@ -2435,6 +2567,12 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     const a = ACTS.find(x => x.id === id);
     if (!a) return;
     const col = $(`[data-col="${a.cat}"] .col-b`);
+    if (a.closes) {
+      const tg = ACTS.find(x => x.id === a.closes);
+      if (tg) setAct(tg.id, { status: 'done', prevStatus: tg.status });
+      S.decisions[id] = 'applied'; save('decisions'); refresh();
+      return toast(tg ? `Marked done: ${tg.title}` : 'Done', () => { if (tg) setAct(tg.id, { status: tg.status }); delete S.decisions[id]; save('decisions'); refresh(); });
+    }
     const done = () => {
       S.decisions[id] = decision; save('decisions');
       S.flash = id;
@@ -2932,8 +3070,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if ((el = t.closest('[data-deny]'))) return deny(el.dataset.deny);
     if (t.closest('[data-queue-toggle]')) { S.queueOpen = !S.queueOpen; save('queueOpen'); return renderActivity(); }
     if (t.closest('[data-toggle-denied]')) { showDenied = !showDenied; return renderQueue(); }
-    if ((el = t.closest('[data-rows]'))) { S.actRows = +el.dataset.rows; save('actRows'); S.lanesOpen.clear(); return renderActivity(); }
-    if ((el = t.closest('[data-lane-more]'))) { const id = el.dataset.laneMore; S.lanesOpen.has(id) ? S.lanesOpen.delete(id) : S.lanesOpen.add(id); renderActivity(); if (!S.lanesOpen.has(id)) $(`[data-col="${id}"]`).scrollIntoView({ block: 'nearest' }); return; }
+    if (t.closest('[data-show-done]')) { S.showDone = !S.showDone; save('showDone'); return renderActivity(); }
+    if ((el = t.closest('[data-keep-upd]'))) { const id = el.dataset.keepUpd; setAct(id, { upd: true }); S.openCards.delete(id); refresh(); return toast('Kept as an update', () => { setAct(id, { upd: false }); refresh(); }); }
+    if ((el = t.closest('[data-make-todo]'))) { const id = el.dataset.makeTodo; setAct(id, { upd: false }); S.openCards.delete(id); refresh(); return toast('Moved to to-dos', () => { setAct(id, { upd: true }); refresh(); }); }
     if ((el = t.closest('[data-ideas-toggle]'))) { const id = el.dataset.ideasToggle; S.ideasShut[id] = !S.ideasShut[id]; save('ideasShut'); return renderActivity(); }
     if (t.closest('[data-todo-toggle]')) { S.todoOpen = !S.todoOpen; save('todoOpen'); return renderTodo(); }
     if (t.closest('[data-todo-all]')) { S.todoAll = !S.todoAll; return renderTodo(); }
@@ -3027,8 +3166,8 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     e.preventDefault();
     const fd = new FormData(form);
     const item = {
-      id: 'm-' + Date.now().toString(36), cat: form.dataset.addForm, kind: fd.get('kind') === 'idea' ? 'idea' : 'action',
-      title: fd.get('title').trim(), status: fd.get('status'), owner: fd.get('owner').trim() || 'Zoe',
+      id: 'm-' + Date.now().toString(36), cat: form.dataset.addForm, kind: fd.get('kind') === 'idea' ? 'idea' : 'action', upd: fd.get('kind') === 'update' || undefined,
+      title: fd.get('title').trim(), status: fd.get('wait').trim() ? 'waiting' : 'todo', owner: fd.get('owner').trim() || 'Zoe',
       wait: fd.get('wait').trim() || null, due: fd.get('due') || null, links: fd.get('link') ? [fd.get('link')] : [], vis: fd.get('vis') || 'team', date: ds(TODAY),
       src: { type: 'manual', ref: 'Added in Marketing HQ', date: ds(TODAY) }
     };
@@ -3095,7 +3234,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     }
     const q = e.target.closest('.q-card');
     if (q && (e.key === 'a' || e.key === 'A')) { e.preventDefault(); return approve(q.dataset.q, q); }
-    if (q && (e.key === 'c' || e.key === 'C')) { e.preventDefault(); return complete(q.dataset.q, q); }
+    if (q && (e.key === 'c' || e.key === 'C') && q.querySelector('[data-complete]')) { e.preventDefault(); return complete(q.dataset.q, q); }
     if (q && (e.key === 'd' || e.key === 'D')) { e.preventDefault(); return deny(q.dataset.q); }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === '1') return setView('activity');
