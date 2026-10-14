@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Atlas Marketing HQ</title>
-<meta name="description" content="Atlas content pipeline, posting calendar and channel activity in one place.">
+<meta name="description" content="Atlas channel activity, content ideas, production timeline and posting calendar in one place.">
 <script>try { var t = localStorage.getItem('atlas-hq:theme'); if (t) document.documentElement.setAttribute('data-theme', JSON.parse(t)); } catch (e) {}</script>
 <style>
 /* ── Atlas brand faces (inlined as data URIs by build.py) ───────────────── */
@@ -701,6 +701,11 @@ main { flex: 1; min-height: 0; position: relative; }
 .bl-add .i { width: 12px; height: 12px; }
 .bl-body .add-form { margin-top: 10px; max-width: 560px; }
 .tab .tab-short { display: none; }
+/* four tabs on one bar: the live page also carries Settings and the account button, so give room in steps */
+@media (max-width: 1700px) and (min-width: 921px) { .tab .i { display: none; } .tab { padding: 0 14px; } }
+@media (max-width: 1440px) and (min-width: 921px) { .brand .name, .brand .rule { display: none; } }
+@media (max-width: 1320px) { .tab .tab-long { display: none; } .tab .tab-short { display: inline; } }
+@media (max-width: 1100px) and (min-width: 921px) { .whois button span, .owner-tools .icon-btn span, #btn-rules span { display: none; } .whois button { padding: 0 8px; } .owner-tools .icon-btn, #btn-rules { width: 32px; padding: 0; } }
 .dismissed-list { display: flex; flex-direction: column; gap: 4px; }
 .dismissed-list .dn-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); padding: 6px 8px; border-radius: 6px; background: var(--bg); }
 .dismissed-list .dn-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -883,6 +888,128 @@ details.more-d .body { margin-top: 8px; display: flex; flex-direction: column; g
 
 .scrim { position: fixed; inset: 0; z-index: 55; background: rgba(0, 0, 0, 0.35); opacity: 0; pointer-events: none; transition: opacity 240ms var(--ease); }
 .scrim.on { opacity: 1; pointer-events: auto; }
+
+/* ── Content Ideas ────────────────────────────────────────────────────── */
+.ideas { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid var(--line); padding: 0 20px 48px; }
+.stages { display: flex; gap: 6px; flex-wrap: wrap; }
+.stages .chip { gap: 7px; }
+.stages .chip:disabled { opacity: 0.45; cursor: default; border-color: var(--line); }
+.stages .chip b { color: var(--ink-3); font-weight: 400; margin-left: 1px; }
+.stages .chip[aria-pressed="true"] b { color: var(--bg); opacity: 0.7; }
+.chip.st-prod .pip { background: var(--ink); }
+.chip.st-live .pip { background: var(--good); }
+.chip.st-nodate .pip { box-shadow: inset 0 0 0 1.5px var(--ink-3); }
+.chip.st-none .pip { border: 1.5px dashed var(--ink-4); }
+.chip[aria-pressed="true"].st-prod .pip { background: var(--bg); }
+.ideas-src { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+.ith { padding-top: 28px; }
+.ith-h { display: flex; align-items: baseline; gap: 14px; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid var(--line); }
+.ith-h h2 { margin: 0; font-family: var(--f-display); font-weight: 360; font-size: 24px; line-height: 0.95; letter-spacing: 0.01em; text-transform: uppercase; }
+.ith-h .only-you { margin-left: auto; }
+.igrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+
+.idea {
+  display: flex; flex-direction: column; gap: 9px; min-height: 188px; text-align: left;
+  padding: 14px 16px 12px; border: 1px solid var(--line-2); border-radius: var(--r-lg); background: var(--s1);
+  transition: border-color 160ms, background-color 160ms;
+}
+.idea:hover { border-color: var(--line-3); background: var(--s2); }
+.idea-top { display: flex; align-items: center; gap: 7px; min-width: 0; font: 400 9.5px/1.2 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.idea-top > span { white-space: nowrap; }
+.idea-top > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dotsep { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-4); flex: none; }
+.idea-t { font-family: var(--f-display); font-weight: 360; font-size: 21px; line-height: 0.98; letter-spacing: 0.01em; text-transform: uppercase; color: var(--ink); text-wrap: balance; padding-top: 2px; }
+.idea-p { flex: 1; font-size: 13px; line-height: 1.45; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.idea-f { display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+.idea-st { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.idea-m { display: flex; align-items: center; gap: 10px; }
+.idea-m .grow { flex: 1; }
+.idea-m .sl { font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-4); white-space: nowrap; }
+.ist { display: inline-flex; align-items: center; gap: 6px; font: 400 10px/1.2 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink); white-space: nowrap; }
+.ist i { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--ink); }
+.ist.red { color: var(--red-ink); } .ist.red i { background: var(--red); }
+.ist.amber { color: var(--amber-ink); } .ist.amber i { background: var(--amber); }
+.ist.live { color: var(--good-ink); } .ist.live .i { width: 12px; height: 12px; stroke-width: 2; }
+.ist.nodate { color: var(--ink-2); } .ist.nodate i { background: none; box-shadow: inset 0 0 0 1.25px var(--ink-3); }
+.ist.none { color: var(--ink-3); } .ist.none i { background: none; border: 1.25px dashed var(--ink-4); }
+.ist-n { font: 400 10px/1.2 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.lift { display: inline-flex; align-items: center; gap: 2px; font: 400 9.5px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.lift i { width: 4px; height: 10px; border-radius: 1px; background: var(--line-2); }
+.lift.l1 i:nth-child(-n+1), .lift.l2 i:nth-child(-n+2), .lift.l3 i:nth-child(-n+3) { background: var(--ink-2); }
+.lift span { margin-left: 6px; }
+
+.budget .bud-top { display: flex; gap: 12px 40px; flex-wrap: wrap; margin-bottom: 18px; }
+.bud-k { display: flex; flex-direction: column; gap: 7px; }
+.bud-v { font-family: var(--f-display); font-weight: 360; font-size: 30px; line-height: 0.9; text-transform: uppercase; }
+.bud-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.bud-t h3 { margin: 0 0 10px; }
+.bud-who { border: 1px solid var(--line-2); border-radius: var(--r-lg); padding: 12px 14px; margin-bottom: 10px; background: var(--s1); }
+.bw-h { display: flex; align-items: baseline; gap: 10px; }
+.bw-h b { font-size: 13.5px; font-weight: 500; }
+.bw-h .grow { flex: 1; }
+.bud-c { font: 400 12px/1 var(--f-mono); color: var(--ink); white-space: nowrap; }
+.bw-n { margin: 5px 0 8px; font-size: 12px; line-height: 1.45; color: var(--ink-3); }
+.bud-who ul, .bud-q { margin: 0; padding: 0; list-style: none; }
+.bud-who li { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 12.5px; }
+.bud-q { border: 1px solid var(--line-2); border-radius: var(--r-lg); padding: 4px 14px; background: var(--s1); }
+.bud-q li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); }
+.bud-q li:first-child { border-top: 0; }
+.q-t { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; min-width: 0; }
+.budget .linkish { text-align: left; font-size: 12.5px; }
+
+.shot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.shot h3 { margin: 0 0 6px; font-family: var(--f-display); font-weight: 360; font-size: 17px; line-height: 1; letter-spacing: 0.01em; text-transform: uppercase; }
+.shot > .lbl { margin: 0 0 10px; }
+.shot ul { margin: 0; padding: 0; list-style: none; }
+.shot li { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); padding: 7px 0; border-top: 1px solid var(--line); }
+.boards { margin: 22px 0 0; font-size: 12px; color: var(--ink-3); }
+.empty-state { padding: 48px 0; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; color: var(--ink-3); }
+.empty-state p { margin: 0; }
+
+/* idea drawer */
+.dr-pitch { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--ink-2); }
+.dr-back { align-self: flex-start; max-width: 100%; display: inline-flex; align-items: center; gap: 4px; margin: -4px 0 -2px -3px; font: 400 10px/1.3 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dr-back:hover { color: var(--ink); }
+.ip-list { display: flex; flex-direction: column; }
+.ip-row { display: grid; grid-template-columns: 15px minmax(0, 1fr) auto 13px; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); text-align: left; color: var(--ink-3); }
+.ip-row:first-child { border-top: 0; padding-top: 2px; }
+.ip-row .t { font-size: 13px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ip-row:hover .t { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-3); }
+.ip-row .d { font: 400 10px/1 var(--f-mono); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.ip-row .d.red { color: var(--red-ink); }
+.idl { margin: 0; display: flex; flex-direction: column; }
+.idl > div { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); align-items: baseline; }
+.idl > div:first-child { border-top: 0; padding-top: 0; }
+.idl dt { font: 400 9.5px/1.4 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.idl dd { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.idl-note { margin: 10px 0 0; font-size: 12px; line-height: 1.45; color: var(--ink-3); }
+.iver { display: flex; flex-direction: column; gap: 8px; }
+.iv { border: 1px solid var(--line-2); border-radius: var(--r); padding: 10px 12px; }
+.iv-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.iv-h b { font-size: 13px; font-weight: 500; }
+.iv p { margin: 5px 0 7px; font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+.icopy { border-left: 2px solid var(--line-3); padding-left: 12px; display: flex; flex-direction: column; gap: 8px; }
+.icopy p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--ink); }
+.ilist { margin: 0; padding: 0; list-style: none; }
+.ilist li { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); padding: 6px 0; border-top: 1px solid var(--line); }
+.ilist li:first-child { border-top: 0; padding-top: 0; }
+.irefs { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.irefs .open-src { font-size: 13px; }
+.irefs .lbl { margin-bottom: 6px; text-transform: none; letter-spacing: 0; font: 400 12px/1.4 var(--f-body); color: var(--ink-3); }
+
+@media (max-width: 920px) {
+  .ideas { padding: 0 16px 40px; }
+  .stages { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
+  .ideas-src { display: none; }
+  .bud-cols, .shot-cols { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .igrid { grid-template-columns: 1fr; }
+  .idea { min-height: 0; }
+  .ith-h { flex-wrap: wrap; row-gap: 6px; }
+  .ith-h h2 { font-size: 21px; }
+}
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
 @media (max-width: 1180px) {
@@ -1110,6 +1237,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   </div>
   <nav class="tabs" role="tablist" aria-label="Views">
     <button class="tab" role="tab" id="tab-activity" aria-controls="v-activity" data-view="activity"></button>
+    <button class="tab" role="tab" id="tab-ideas" aria-controls="v-ideas" data-view="ideas"></button>
     <button class="tab" role="tab" id="tab-timeline" aria-controls="v-timeline" data-view="timeline"></button>
     <button class="tab" role="tab" id="tab-calendar" aria-controls="v-calendar" data-view="calendar"></button>
   </nav>
@@ -1144,6 +1272,10 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     <div class="toolbar" id="tb-activity"></div>
     <div class="briefing" id="briefing"></div>
   </section>
+  <section class="view" id="v-ideas" role="tabpanel" aria-labelledby="tab-ideas" hidden>
+    <div class="toolbar" id="tb-ideas"></div>
+    <div class="ideas" id="ideas"></div>
+  </section>
 </main>
 
 <div class="scrim" id="scrim"></div>
@@ -1153,7 +1285,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script type="text/plain" id="hq-app-src">
-/* Atlas Marketing HQ: one rules engine feeding three views (Timeline, Calendar, Activity). */
+/* Atlas Marketing HQ: one rules engine feeding four views (Activity, Content Ideas, Timeline, Calendar). */
 (() => {
   'use strict';
 
@@ -1191,6 +1323,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   // ── Icons (authored, 16px grid, 1.4 stroke) ────────────────────────────
   const P = {
     gantt: '<path d="M2.5 4h7M5 8h8.5M3.5 12h6"/>',
+    bulb: '<path d="M6.2 13h3.6M6.7 14.8h2.6"/><path d="M5.4 10.6A4.3 4.3 0 1 1 10.6 10.6c-.5.45-.75.95-.8 1.6H6.2c-.05-.65-.3-1.15-.8-1.6Z"/>',
     calendar: '<rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/>',
     grid: '<rect x="2.5" y="2.5" width="3" height="11" rx="1"/><rect x="6.5" y="2.5" width="3" height="7" rx="1"/><rect x="10.5" y="2.5" width="3" height="9" rx="1"/>',
     moon: '<path d="M13.2 9.8A5.5 5.5 0 0 1 6.2 2.8a5.5 5.5 0 1 0 7 7Z"/>',
@@ -1248,9 +1381,12 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     }
   };
 
-  let CH, SEC, BASE, BYID, WEEKS;
+  let CH, SEC, BASE, BYID, WEEKS, IDEAS, IDEA, THEME;
   function bind(data, act) {
     DATA = data; ACT = act;
+    IDEAS = DATA.ideas || { themes: [], items: [], shots: [] };
+    IDEA = Object.fromEntries(IDEAS.items.map(i => [i.id, i]));
+    THEME = Object.fromEntries(IDEAS.themes.map(t => [t.id, t]));
     CH = Object.fromEntries(DATA.channels.map(c => [c.id, c]));
     SEC = Object.fromEntries(DATA.sections.map(s => [s.id, s]));
     BASE = DATA.items;
@@ -1292,7 +1428,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     },
     sel: null,
     ripple: null,
-    addingIn: null
+    addingIn: null,
+    ideaStage: 'all',
+    back: null
   };
   const save = k => store.set(k, S[k]);
   const PRIV = () => OWNER && !S.preview;   // show sources, private cards and the queue
@@ -1471,6 +1609,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     const pending = ACTS.filter(a => a.state === 'pending').length;
     $('#tab-timeline').innerHTML = `${ic('gantt')}<span class="tab-long">Content Production Timeline</span><span class="tab-short">Production</span>`;
     $('#tab-calendar').innerHTML = `${ic('calendar')}Calendar`;
+    $('#tab-ideas').innerHTML = `${ic('bulb')}<span class="tab-long">Content Ideas</span><span class="tab-short">Ideas</span>`;
     $('#tab-activity').innerHTML = `${ic('grid')}Activity${pending && PRIV() ? `<span class="count" aria-label="${pending} to review">${pending}</span>` : ''}`;
     $$('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.view === S.view)));
     const last = (ACT.scans || []).map(s => new Date(s.at)).sort((a, b) => b - a)[0];
@@ -2051,11 +2190,136 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       <div class="dismissed-list">${denied.map(a => `<div class="dn-row"><span>${esc(a.title)}</span><button class="mini" data-undeny="${a.id}" title="Move back to new" aria-label="Move back to new">${ic('reset')}</button></div>`).join('') || '<div class="sub">Nothing denied.</div>'}</div>`, 360);
   }
 
+  // ── Content Ideas (from the Content Doc) ───────────────────────────────
+  // Each idea's status comes from its pieces on the production timeline, so it moves when the timeline does.
+  const STAGES = [['all', 'All'], ['prod', 'In production'], ['live', 'Live'], ['nodate', 'No date yet'], ['none', 'Not in the pipeline']];
+  function ideaStatus(idea) {
+    const rs = (idea.links || []).map(id => R[id]).filter(Boolean);
+    if (!rs.length) return { stage: 'none', rs };
+    const open = rs.filter(r => r.a.state !== 'live');
+    if (!open.length) return { stage: 'live', rs, open };
+    const dated = open.filter(r => r.a.g.post != null);
+    const worst = open.some(r => r.a.state === 'red') ? 'red' : open.some(r => r.a.state === 'amber') ? 'amber' : 'ok';
+    if (!dated.length) return { stage: rs.length > open.length ? 'prod' : 'nodate', rs, open, worst, ready: open.every(r => r.a.state === 'ready') };
+    return { stage: 'prod', rs, open, worst, next: Math.min(...dated.map(r => r.a.g.post)) };
+  }
+  function ideaStatusHtml(st) {
+    const n = st.rs.length;
+    const of = n > 1 ? `<span class="ist-n">${n - st.open.length ? `${n - st.open.length} of ${n} live` : `${n} pieces`}</span>` : '';
+    if (st.stage === 'none') return '<span class="ist none"><i></i>Not in the pipeline yet</span>';
+    if (st.stage === 'live') return `<span class="ist live">${ic('check')}Live</span>${n > 1 ? `<span class="ist-n">${n} pieces</span>` : ''}`;
+    if (st.next == null) return `<span class="ist nodate"><i></i>${st.ready ? 'Asset ready, no post date' : 'On the timeline, no date yet'}</span>${of}`;
+    const word = st.next < TODAY ? `Missed ${f(st.next)}` : `${st.worst === 'red' ? 'Slipped · ' : st.worst === 'amber' ? 'At risk · ' : ''}Next post ${f(st.next)}`;
+    return `<span class="ist ${st.worst}"><i></i>${word}</span>${of}`;
+  }
+  const liftLevel = l => (/high/i.test(l || '') ? 3 : /medium/i.test(l || '') ? 2 : l ? 1 : 0);
+  const liftHtml = l => l ? `<span class="lift l${liftLevel(l)}" title="Lift: ${esc(l)}" aria-label="Lift: ${esc(l)}"><i></i><i></i><i></i><span>${esc(l)} lift</span></span>` : '';
+  const seriesWord = it => (it.series === true ? 'Series' : it.series === false ? 'One-off' : 'One-off or series');
+  const ideaText = it => [it.t, it.fmt, it.pitch, it.desc, it.goal, it.who, it.next, it.note, THEME[it.th] && THEME[it.th].name,
+    ...(it.extras || []).flatMap(x => [x.h, ...x.lines]), ...(it.versions || []).map(v => v.t + ' ' + v.what)].join(' ').toLowerCase();
+  const ideaQ = it => !S.q || S.q.toLowerCase().split(/\s+/).every(w => ideaText(it).includes(w));
+
+  function renderIdeasToolbar(counts) {
+    $('#tb-ideas').innerHTML = `
+      <h1>Content Ideas</h1>
+      ${searchBox('q-ideas')}
+      <div class="stages" role="group" aria-label="Filter by stage">${STAGES.map(([k, w]) => `<button class="chip st-${k}" data-istage="${k}" aria-pressed="${S.ideaStage === k}"${!counts[k] && S.ideaStage !== k ? ' disabled' : ''}>${k === 'all' ? '' : '<span class="pip"></span>'}${w}<b>${counts[k] || 0}</b></button>`).join('')}</div>
+      <span class="grow"></span>
+      <span class="lbl ideas-src">${ic('note', 'sm')}${esc(IDEAS.source ? `${IDEAS.source.name} · slides ${IDEAS.source.slides}` : '')}</span>`;
+  }
+
+  function ideaCard(it, st) {
+    return `<button class="idea" type="button" data-idea="${it.id}">
+      <span class="idea-top"><span>${esc(it.fmt)}</span><span class="dotsep"></span><span>${seriesWord(it)}</span>${it.email ? '<span class="dotsep"></span><span>Email idea</span>' : ''}</span>
+      <span class="idea-t">${esc(it.t)}</span>
+      <span class="idea-p">${esc(it.pitch)}</span>
+      <span class="idea-f"><span class="idea-st">${ideaStatusHtml(st)}</span><span class="idea-m">${liftHtml(it.lift)}<span class="grow"></span><span class="sl">Slide ${esc(it.slide)}</span></span></span>
+    </button>`;
+  }
+
+  function budgetHtml() {
+    const c = IDEAS.costs;
+    if (!c || !PRIV()) return '';
+    const link = x => x.idea && IDEA[x.idea] ? `<button class="linkish" data-idea="${x.idea}">${esc(x.t)}</button>` : esc(x.t);
+    return `<section class="ith budget">
+      <header class="ith-h"><h2>Budget</h2><span class="lbl">Slides ${esc(c.slide)}</span><span class="only-you">${ic('lock', 'sm')}Only you</span></header>
+      <div class="bud-top">
+        <div class="bud-k"><span class="lbl">Aligned budget</span><span class="bud-v">${esc(c.budget)}</span></div>
+        ${c.allIn.map(a => `<div class="bud-k"><span class="lbl">All-in estimate · ${esc(a.who)}</span><span class="bud-v">${esc(a.cost)}</span></div>`).join('')}
+      </div>
+      <div class="bud-cols">
+        <div class="bud-t"><h3 class="lbl">What's been briefed</h3>${c.briefed.map(b => `
+          <div class="bud-who"><div class="bw-h"><b>${esc(b.who)}</b><span class="lbl">${esc(b.role)}</span><span class="grow"></span><span class="bud-c">${esc(b.cost)}</span></div>
+          <p class="bw-n">${esc(b.note)}</p>
+          <ul>${b.items.map(x => `<li>${link(x)}<span class="lbl">${esc(x.n)}</span></li>`).join('')}</ul></div>`).join('')}
+        </div>
+        <div class="bud-t"><h3 class="lbl">New content to brief or quote</h3>
+          <ul class="bud-q">${c.toQuote.map(x => `<li><span class="q-t">${link(x)}<span class="lbl">${esc(x.n)} · ${esc(x.type)}</span></span><span class="bud-c">${esc(x.cost)}</span></li>`).join('')}</ul>
+          <p class="bw-n">${esc(c.toQuoteNote)}</p>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function renderIdeas() {
+    if (!IDEAS.items.length) {
+      renderIdeasToolbar({});
+      $('#ideas').innerHTML = '<div class="empty-state"><p>The content ideas will appear here after the next update.</p></div>';
+      return;
+    }
+    const all = IDEAS.items.filter(ideaQ).map(it => ({ it, st: ideaStatus(it) }));
+    const counts = { all: all.length };
+    all.forEach(x => { counts[x.st.stage] = (counts[x.st.stage] || 0) + 1; });
+    renderIdeasToolbar(counts);
+    const shown = all.filter(x => S.ideaStage === 'all' || x.st.stage === S.ideaStage);
+    const themes = IDEAS.themes.map(th => ({ th, list: shown.filter(x => x.it.th === th.id) })).filter(g => g.list.length);
+    const filtered = S.q || S.ideaStage !== 'all';
+    $('#ideas').innerHTML = (themes.length ? themes.map(({ th, list }) => `
+      <section class="ith">
+        <header class="ith-h"><h2>${esc(th.name)}</h2><span class="lbl">${plural(list.length, 'idea')} · Slides ${esc(th.slides)}</span></header>
+        <div class="igrid">${list.map(x => ideaCard(x.it, x.st)).join('')}</div>
+      </section>`).join('') : `<div class="empty-state"><p>No ideas match.</p><button class="btn" data-ideas-clear>${ic('reset')}Show all ideas</button></div>`)
+      + (filtered ? '' : budgetHtml() + `
+      <section class="ith shots">
+        <header class="ith-h"><h2>Shoot list</h2><span class="lbl">What to commission · Slides 72–74</span></header>
+        <div class="shot-cols">${(IDEAS.shots || []).map(s => `<div class="shot"><h3>${esc(s.name)}</h3><p class="lbl">${esc(s.sub)} · Slide ${esc(s.slide)}</p><ul>${s.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div>
+        ${IDEAS.boards ? `<p class="boards">${esc(IDEAS.boards)}</p>` : ''}
+      </section>`);
+  }
+
+  function renderIdeaDrawer(it) {
+    const st = ideaStatus(it);
+    const th = THEME[it.th];
+    const sec = (h, inner, cls = '') => `<section class="${cls}"><h3>${h}<span class="grow"></span></h3>${inner}</section>`;
+    const postWord = r => r.a.state === 'live' ? `Live${r.a.g.post != null ? ` · ${f(r.a.g.post)}` : ''}` : r.a.g.post != null ? `${r.a.g.post < TODAY ? 'Was due' : 'Posts'} ${f(r.a.g.post)}` : r.a.state === 'ready' ? 'Asset ready' : 'No date';
+    let body = sec('On the production timeline', st.rs.length
+      ? `<div class="ip-list">${st.rs.map(r => `<button class="ip-row" data-open="${r.id}">${stIcon(r.a.state)}<span class="t">${esc(r.t)}</span><span class="d ${r.a.state === 'red' ? 'red' : ''}">${postWord(r)}</span>${ic('chevR', 'sm')}</button>`).join('')}</div>`
+      : '<p class="notes">Not on the production timeline yet.</p>');
+    body += sec('The idea', `<p class="notes">${esc(it.desc)}</p>`);
+    if (it.goal) body += sec('What it does for Atlas', `<p class="notes">${esc(it.goal)}</p>`);
+    const rows = [['Made by', it.who], ['Lift', it.lift], ['Next step', it.next], ['Deck timing', it.timing]].filter(x => x[1]);
+    if (PRIV() && it.cost) rows.push(['Cost', `${esc(it.cost)} <span class="only-you">${ic('lock', 'sm')}Only you</span>`, true]);
+    body += sec('Details', `<dl class="idl">${rows.map(([k, v, raw]) => `<div><dt>${k}</dt><dd>${raw ? v : esc(v)}</dd></div>`).join('')}</dl>${it.note ? `<p class="idl-note">${esc(it.note)}</p>` : ''}`);
+    (it.versions || []).length && (body += sec('Ways to make it', `<div class="iver">${it.versions.map(v => `<div class="iv"><div class="iv-h"><b>${esc(v.t)}</b>${PRIV() && v.cost ? `<span class="bud-c">${esc(v.cost)}</span>` : ''}</div><p>${esc(v.what)}</p><span class="lbl">${esc(v.time)}</span></div>`).join('')}</div>${PRIV() && it.versions.some(v => v.cost) ? `<p class="idl-note">Costs are visible only in Private view.</p>` : ''}`));
+    (it.extras || []).forEach(x => { body += sec(esc(x.h), x.copy ? `<div class="icopy">${x.lines.map(l => `<p>${esc(l)}</p>`).join('')}</div>` : `<ul class="ilist">${x.lines.map(l => `<li>${esc(l)}</li>`).join('')}</ul>`); });
+    if ((it.refs || []).length) body += sec('References', `<div class="irefs">${it.refs.map(r => `<a class="open-src" href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.t)} ${ic('link')}</a>${r.note ? `<span class="lbl">${esc(r.note)}</span>` : ''}`).join('')}</div>`);
+    $('#drawer').innerHTML = `
+      <div class="dr-h">
+        <div class="crumbs"><h2>${esc(it.t)}</h2><button class="mini" data-close aria-label="Close">${ic('x')}</button></div>
+        <p class="dr-pitch">${esc(it.pitch)}</p>
+        <div class="tags"><span class="pill">${esc(th ? th.name : '')}</span><span class="pill">${esc(it.fmt)}</span><span class="pill">${seriesWord(it)}</span>${it.email ? '<span class="pill">Email idea</span>' : ''}</div>
+      </div>
+      <div class="dr-b">${body}</div>
+      <div class="dr-f"><span class="src">${ic('note')}<span class="r">${esc(IDEAS.source ? IDEAS.source.name : 'Content Doc')} · slide ${esc(it.slide)}</span></span></div>`;
+  }
+
   // ── Drawer ─────────────────────────────────────────────────────────────
   function syncHash() {
     try { history.replaceState(null, '', `#${S.view}${S.sel ? '/' + S.sel : ''}`); } catch (e) { /* file:// or sandboxed */ }
   }
   function openDrawer(id) {
+    // opening a timeline piece from an idea keeps a way back to the idea
+    S.back = IDEA[S.sel] && !IDEA[id] && S.sel ? S.sel : null;
     S.sel = id;
     syncHash();
     renderDrawer();
@@ -2072,8 +2336,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     $('#drawer').classList.remove('open');
     $('#scrim').classList.remove('on');
     $$('.g-row.item.sel').forEach(r => r.classList.remove('sel'));
-    const back = $(`.g-row.item[data-id="${id}"] .g-label`);
-    if (back && S.view === 'timeline') back.focus({ preventScroll: true });
+    S.back = null;
+    const back = S.view === 'ideas' ? $(`.idea[data-idea="${id}"]`) : $(`.g-row.item[data-id="${id}"] .g-label`);
+    if (back && (S.view === 'timeline' || S.view === 'ideas')) back.focus({ preventScroll: true });
   }
 
   function verdictHtml(r) {
@@ -2100,6 +2365,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   }
 
   function renderDrawer() {
+    if (IDEA[S.sel]) return renderIdeaDrawer(IDEA[S.sel]);
     const r = R[S.sel];
     if (!r) return;
     const { state, g } = r.a;
@@ -2138,6 +2404,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     const srcName = r.moved === 'overview' || r.kind === 'project' || r.kind === 'launch' ? 'Production Timeline + Project Timeline Overview' : 'Production Timeline';
     $('#drawer').innerHTML = `
       <div class="dr-h">
+        ${S.back && IDEA[S.back] ? `<button class="dr-back" data-idea="${S.back}">${ic('chevL', 'sm')}${esc(IDEA[S.back].t)}</button>` : ''}
         <div class="crumbs"><h2>${esc(r.t)}</h2><button class="mini" data-close aria-label="Close">${ic('x')}</button></div>
         <div class="tags"><span class="pill">${esc(sec.name)}${r.sub ? ' · ' + esc(r.sub) : ''}</span><span class="pill" data-ch="${r.ch}"><span class="chdot"></span>${esc(CH[r.ch].name)}</span>${r.who ? `<span class="pill">${ic('user')}${esc(r.who)}</span>` : ''}${r.vendor ? `<span class="pill">${esc(r.vendor)}</span>` : ''}${r.tag ? `<span class="pill">${esc(r.tag)}</span>` : ''}${r.edited ? '<span class="pill change">Edited here</span>' : ''}</div>
       </div>
@@ -2260,6 +2527,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if (S.view === 'timeline') { renderTimelineToolbar(); renderGantt(); renderLegend(); }
     if (S.view === 'calendar') renderCalendar();
     if (S.view === 'activity') renderActivity();
+    if (S.view === 'ideas') renderIdeas();
   }
   function refresh() {
     compute();
@@ -2349,6 +2617,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     }
     if ((el = t.closest('[data-sec]'))) { S.collapsed[el.dataset.sec] = !S.collapsed[el.dataset.sec]; save('collapsed'); return renderGantt(); }
     if ((el = t.closest('[data-open]'))) { closePop(); return openDrawer(el.dataset.open); }
+    if ((el = t.closest('[data-idea]'))) { closePop(); return openDrawer(el.dataset.idea); }
+    if ((el = t.closest('[data-istage]'))) { S.ideaStage = el.dataset.istage === S.ideaStage ? 'all' : el.dataset.istage; return renderIdeas(); }
+    if (t.closest('[data-ideas-clear]')) { S.q = ''; S.ideaStage = 'all'; return renderIdeas(); }
     if ((el = t.closest('.g-row.item')) && !justDragged) return openDrawer(el.dataset.id);
     if (t.closest('[data-close]') || t.closest('#scrim')) return closeDrawer();
     if ((el = t.closest('[data-reset]'))) { delete S.overrides[el.dataset.reset]; save('overrides'); toast('Edits reset to the sheet'); return refresh(); }
@@ -2438,7 +2709,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 
   document.addEventListener('input', e => {
     const t = e.target;
-    if (t.matches('#q-timeline, #q-calendar, #q-activity')) {
+    if (t.matches('#q-timeline, #q-calendar, #q-activity, #q-ideas')) {
       S.q = t.value;
       const id = t.id, pos = t.selectionStart;
       compute(); renderPulse();
@@ -2465,8 +2736,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-ch-toggle], .bl-item[data-item-toggle]')) { e.preventDefault(); return e.target.click(); }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === '1') return setView('activity');
-    if (e.key === '2') return setView('timeline');
-    if (e.key === '3') return setView('calendar');
+    if (e.key === '2') return setView('ideas');
+    if (e.key === '3') return setView('timeline');
+    if (e.key === '4') return setView('calendar');
     if (e.key === '/') { e.preventDefault(); const s = $(`#q-${S.view}`); return s && s.focus(); }
     if (e.key === 't' && S.view === 'timeline') return scrollGanttToToday(true);
   });
@@ -2554,6 +2826,11 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       return m;
     });
     data.rules = { ...S.rules };
+    // Content Doc costs stay in Private view (build.py strips them from the team file the same way)
+    if (data.ideas) {
+      delete data.ideas.costs;
+      data.ideas.items.forEach(it => { delete it.cost; (it.versions || []).forEach(v => delete v.cost); });
+    }
     data.status = { ...(DATA.status || {}) };
     Object.entries(S.tldr).forEach(([k, v]) => { data.status[k] = v; });
     const items = activity().filter(a => (a.state === 'approved' || a.state === 'completed') && a.vis === 'team').map(a => {
@@ -2603,12 +2880,12 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   }
 
   // ── Boot ───────────────────────────────────────────────────────────────
-  const VIEWS = ['activity', 'timeline', 'calendar'];
+  const VIEWS = ['activity', 'ideas', 'timeline', 'calendar'];
   const [hv, hid] = decodeURIComponent(location.hash.slice(1)).split('/');
   if (VIEWS.includes(hv)) S.view = hv;
   if (!VIEWS.includes(S.view)) S.view = 'activity';
   refresh();
-  if (hid && R[hid]) openDrawer(hid);
+  if (hid && (R[hid] || IDEA[hid])) openDrawer(hid);
   if (S.view === 'timeline') requestAnimationFrame(() => scrollGanttToToday(false));
   window.addEventListener('resize', () => { closePop(); });
 
@@ -2620,7 +2897,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     const remoteRefresh = () => {
       if (busy()) { pendingRemote = true; return; }
       pendingRemote = false;
-      if (S.sel && !R[S.sel] && !BYID[S.sel]) closeDrawer();
+      if (S.sel && !R[S.sel] && !BYID[S.sel] && !IDEA[S.sel]) closeDrawer();
       refresh();
     };
     document.addEventListener('focusout', () => { if (pendingRemote) setTimeout(remoteRefresh, 0); });
@@ -2633,7 +2910,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
       rebind(data, act) {
         bind(data, act);
         S.rules = { ...DATA.rules, ...store.get('rules', {}) };
-        if (S.sel && !BYID[S.sel]) closeDrawer();
+        if (S.sel && !BYID[S.sel] && !IDEA[S.sel]) closeDrawer();
         remoteRefresh();
         publishTeamSoon();
       },
