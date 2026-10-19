@@ -1458,6 +1458,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     <button class="tab" role="tab" id="tab-ideas" aria-controls="v-ideas" data-view="ideas"></button>
     <button class="tab" role="tab" id="tab-timeline" aria-controls="v-timeline" data-view="timeline"></button>
     <button class="tab" role="tab" id="tab-calendar" aria-controls="v-calendar" data-view="calendar"></button>
+    <button class="tab" role="tab" id="tab-press" aria-controls="v-press" data-view="press"></button>
   </nav>
   <div class="top-actions">
     <div class="sync lbl" id="sync"></div>
@@ -1499,6 +1500,10 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   <section class="view" id="v-ideas" role="tabpanel" aria-labelledby="tab-ideas" hidden>
     <div class="toolbar" id="tb-ideas"></div>
     <div class="ideas" id="ideas"></div>
+  </section>
+  <section class="view" id="v-press" role="tabpanel" aria-labelledby="tab-press" hidden>
+    <div class="toolbar" id="tb-press"></div>
+    <div class="press" id="press"></div>
   </section>
 </main>
 
@@ -1559,6 +1564,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     clock: '<circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3"/>',
     chevD: '<path d="M4 6l4 4 4-4"/>',
     chevU: '<path d="M4 10l4-4 4 4"/>',
+    press: '<rect x="2.5" y="3" width="9" height="10.5" rx="1"/><path d="M11.5 6H13.5v6a1.5 1.5 0 0 1-3 0M4.6 5.8h4.8M4.6 8.4h4.8M4.6 11h3"/>',
     pin: '<path d="M8 14s4.5-4.2 4.5-7.6a4.5 4.5 0 0 0-9 0C3.5 9.8 8 14 8 14Z"/><circle cx="8" cy="6.4" r="1.6"/>',
     chevL: '<path d="M10 4 6 8l4 4"/>',
     chevR: '<path d="M6 4l4 4-4 4"/>',
@@ -1642,6 +1648,8 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     queueOpen: store.get('queueOpen', window.innerWidth >= 1680),
     todoOpen: store.get('todoOpen', true),
     showDone: store.get('showDone', false),
+    pressMode: store.get('pressMode', 'coverage'),
+    pressStage: 'all',
     ideasShut: store.get('ideasShut', {}),
     todoAll: false,
     openCards: new Set(),
@@ -1839,6 +1847,8 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     $('#tab-timeline').innerHTML = `${ic('gantt')}<span class="tab-long">Content Production Timeline</span><span class="tab-short">Production</span>`;
     $('#tab-calendar').innerHTML = `${ic('calendar')}Calendar`;
     $('#tab-ideas').innerHTML = `${ic('bulb')}<span class="tab-long">Content Ideas</span><span class="tab-short">Ideas</span>`;
+    const found = PRIV() ? pressFound().filter(x => !S.decisions[x.id]).length : 0;
+    $('#tab-press').innerHTML = `${ic('press')}Press${found ? `<span class="count" aria-label="${found} new mentions to review">${found}</span>` : ''}`;
     $('#tab-activity').innerHTML = `${ic('grid')}Activity${pending && PRIV() ? `<span class="count" aria-label="${pending} to review">${pending}</span>` : ''}`;
     $$('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.view === S.view)));
     const last = (ACT.scans || []).map(s => new Date(s.at)).sort((a, b) => b - a)[0];
@@ -2611,6 +2621,105 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if (card) { card.classList.add('leaving'); setTimeout(go, 220); } else go();
   }
 
+  // ── Press: coverage we've had, and the outlets we're working ──────────
+  // Coverage and outlets are team-safe (src/data.js → press). Emails, private notes and the
+  // web scan's new finds live in the private data (press.contacts, press.found).
+  const PR = () => DATA.press || { coverage: [], outlets: [], moments: [], rels: [], featured: [] };
+  const pressFound = () => (ACT.press && ACT.press.found) || [];
+  const pressCoverage = () => [...PR().coverage, ...pressFound().filter(x => S.decisions[x.id] === 'approved').map(x => ({ ...x, m: 'more' }))];
+  const P_STAGE = [['covered', 'Covered'], ['talking', 'Talking'], ['followup', 'Follow up'], ['passed', 'Passed for now'], ['pitch', 'To pitch']];
+  const P_STAGE_W = Object.fromEntries(P_STAGE);
+  const pText = x => [x.outlet, x.t, x.desc, x.note, x.by, x.contact, x.next, x.region, x.type].join(' ').toLowerCase();
+  const pMatch = x => !S.q || S.q.toLowerCase().split(/\s+/).every(w => pText(x).includes(w));
+  const coverageOf = name => pressCoverage().filter(x => x.outlet.toLowerCase().startsWith(name.toLowerCase()));
+  function renderPressToolbar() {
+    const src = PR().sources || {};
+    $('#tb-press').innerHTML = `
+      <h1>Press</h1>
+      ${searchBox('q-press')}
+      <div class="seg" role="group" aria-label="Show"><button data-pmode="coverage" aria-pressed="${S.pressMode === 'coverage'}">Coverage</button><button data-pmode="outlets" aria-pressed="${S.pressMode === 'outlets'}">Outlets</button></div>
+      ${S.pressMode === 'outlets' ? `<div class="stages" role="group" aria-label="Filter by stage">${P_STAGE.map(([k, w]) => `<button class="chip ps-${k}" data-pstage="${k}" aria-pressed="${S.pressStage === k}"><span class="pip"></span>${w}</button>`).join('')}</div>` : ''}
+      <span class="grow"></span>
+      <span class="lbl pr-srcs">${['sheet', 'report', 'tracker'].filter(k => src[k]).map(k => `<a href="${esc(src[k].url)}" target="_blank" rel="noopener">${esc(src[k].t)}</a>`).join('<span class="dotsep"></span>')}</span>`;
+  }
+  function pDate(x) { return x.d ? f(dn(x.d)) : ''; }
+  function covRow(x) {
+    const amp = (x.amp || []).map(a => `<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.t)}${a.reach ? ` <b>${esc(a.reach)}</b>` : ''}</a>`).join('');
+    return `<li class="pr-row">
+      <span class="pr-d">${pDate(x) || '<span class="nd">No date</span>'}</span>
+      <span class="pr-o">${esc(x.outlet)}${x.region ? `<em>${esc(x.region)}</em>` : ''}</span>
+      <span class="pr-main">
+        <a class="pr-t ${x.t ? '' : 'desc'}" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.t || x.desc)}${ic('link', 'sm')}</a>
+        ${x.by || x.note ? `<span class="pr-note">${x.by ? `<span class="by">By ${esc(x.by)}</span>` : ''}${x.note ? esc(x.note) : ''}</span>` : ''}
+        ${amp ? `<span class="pr-amp"><span class="k">Also on</span>${amp}</span>` : ''}
+      </span>
+      <span class="pr-ty">${esc(x.type || '')}${x.tone === 'critical' ? '<span class="pr-tag crit">Critical</span>' : ''}${x.found && PRIV() ? '<span class="pr-tag new" title="Found online by Claude; not in the sheet or the coverage report">Found online</span>' : ''}</span>
+    </li>`;
+  }
+  function renderPress() {
+    renderPressToolbar();
+    const el = $('#press');
+    if (S.pressMode === 'outlets') { el.innerHTML = outletsHtml(); return; }
+    const cov = pressCoverage().filter(pMatch);
+    const all = pressCoverage();
+    const regions = new Set(all.map(x => x.region || 'U.S.'));
+    const first = all.map(x => x.d).filter(Boolean).sort()[0];
+    const pending = PRIV() ? pressFound().filter(x => !S.decisions[x.id]) : [];
+    const byM = {};
+    cov.forEach(x => (byM[x.m] = byM[x.m] || []).push(x));
+    const range = m => m.d ? (m.e && m.e !== m.d ? (m.d.slice(0, 7) === m.e.slice(0, 7) && m.d.slice(8) !== '01' || m.id === 'launch' ? `${f(dn(m.d))} – ${ud(dn(m.e)).getUTCDate()}, ${m.e.slice(0, 4)}` : `${MONTHS[ud(dn(m.d)).getUTCMonth()]} – ${MONTHS[ud(dn(m.e)).getUTCMonth()]} ${m.e.slice(0, 4)}`) : `${MONTHS[ud(dn(m.d)).getUTCMonth()]} ${m.d.slice(0, 4)}`) : '';
+    const moments = PR().moments.filter(m => (byM[m.id] || []).length).map(m => `
+      <section class="pr-m" aria-label="${esc(m.t)}">
+        <header class="pr-mh"><h2>${esc(m.t)}</h2>${range(m) ? `<span class="mono">${range(m)}</span>` : ''}</header>
+        ${m.note && !S.q ? `<p class="pr-mnote">${esc(m.note)}${m.src ? ` <a href="${esc(m.src.url)}" target="_blank" rel="noopener">${esc(m.src.t)}${ic('link', 'sm')}</a>` : ''}</p>` : ''}
+        <ol class="pr-list">${byM[m.id].sort((a, b) => (a.d || '9') < (b.d || '9') ? -1 : (a.d || '9') > (b.d || '9') ? 1 : 0).map(covRow).join('')}</ol>
+      </section>`).join('');
+    el.innerHTML = `<div class="pr-wrap">
+      ${S.q ? '' : `<header class="pr-hero">
+        <p class="kicker">As featured in</p>
+        <p class="pr-wall">${(PR().featured || []).map(n => `<span>${esc(n)}</span>`).join('')}</p>
+        <p class="pr-sum">${plural(all.length, 'piece')} since ${first ? `${MONTHS[ud(dn(first)).getUTCMonth()]} ${first.slice(0, 4)}` : 'launch'}, in ${plural(regions.size, 'country', 'countries')}.</p>
+      </header>`}
+      ${pending.length ? `<section class="pr-found" aria-label="Found by Claude">
+        <header><span class="spark">${ic('spark')}</span><h2>Found by Claude</h2><p>New articles that mention Atlas, from the twice-daily web scan. Add the ones about us; dismiss the rest.</p><span class="only-you">${ic('lock', 'sm')}Only you</span></header>
+        <ul>${pending.map(x => `<li class="pr-frow">
+          <span class="pr-d">${pDate(x)}</span>
+          <span class="pr-o">${esc(x.outlet)}</span>
+          <span class="pr-main"><a class="pr-t" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.t || x.desc || x.url)}${ic('link', 'sm')}</a>${x.note ? `<span class="pr-note">${esc(x.note)}</span>` : ''}</span>
+          <span class="pr-fa"><button class="btn sm" data-found="${x.id}" data-v="denied">Not about us</button><button class="btn sm primary" data-found="${x.id}" data-v="approved">Add to coverage</button></span>
+        </li>`).join('')}</ul>
+      </section>` : ''}
+      ${moments || `<div class="pr-empty">Nothing matches “${esc(S.q)}”.</div>`}
+    </div>`;
+  }
+  function outletsHtml() {
+    const C = (PRIV() && ACT.press && ACT.press.contacts) || {};
+    const list = PR().outlets.filter(o => pMatch(o) && (S.pressStage === 'all' || o.stage === S.pressStage));
+    const card = o => {
+      const n = coverageOf(o.outlet).length, pc = C[o.id];
+      return `<article class="pr-oc ps-${o.stage}">
+        <div class="pr-oh"><span class="pr-on">${esc(o.outlet)}</span><span class="pr-st"><span class="pip"></span>${P_STAGE_W[o.stage]}</span></div>
+        ${o.contact ? `<div class="pr-ct">${esc(o.contact)}</div>` : ''}
+        ${o.next ? `<p class="pr-next">${esc(o.next)}</p>` : ''}
+        ${n ? `<button class="pr-cov" data-pjump="${esc(o.outlet)}">${plural(n, 'piece')} of coverage ${ic('arrow', 'sm')}</button>` : ''}
+        ${pc ? `<div class="priv"><div class="priv-h">${ic('lock')}Only you</div>${pc.email ? `<a class="pr-mail" href="mailto:${esc(pc.email)}">${ic('mail', 'sm')}${esc(pc.email)}</a>` : ''}${pc.note ? `<div class="pnote">${esc(pc.note)}</div>` : ''}</div>` : ''}
+      </article>`;
+    };
+    const groups = PR().rels.map(r => {
+      const os = list.filter(o => o.rel === r.id);
+      if (!os.length) return '';
+      const full = os.filter(o => o.contact || o.next || o.stage !== 'pitch' || C[o.id]);
+      const bare = os.filter(o => !full.includes(o));
+      return `<section class="pr-g" aria-label="${esc(r.t)}">
+        <header class="pr-mh"><h2>${esc(r.t)}</h2><span class="mono">${plural(os.length, 'outlet')}</span></header>
+        ${r.note ? `<p class="pr-mnote">${esc(r.note)}</p>` : ''}
+        ${full.length ? `<div class="pr-ogrid">${full.map(card).join('')}</div>` : ''}
+        ${bare.length ? `<div class="pr-bare"><span class="k">${full.length ? 'Also on the list, to pitch' : 'To pitch'}</span><div class="pr-chips">${bare.map(o => `<span class="pr-chip">${esc(o.outlet)}</span>`).join('')}</div></div>` : ''}
+      </section>`;
+    }).join('');
+    return `<div class="pr-wrap">${groups || `<div class="pr-empty">No outlets match.</div>`}</div>`;
+  }
+
   // ── Content Ideas (from the Content Doc) ───────────────────────────────
   // Each idea's status comes from its pieces on the production timeline, so it moves when the timeline does.
   const STAGES = [['all', 'All'], ['prod', 'In production'], ['live', 'Live'], ['nodate', 'No date yet'], ['none', 'Not in the pipeline']];
@@ -3009,6 +3118,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if (S.view === 'calendar') renderCalendar();
     if (S.view === 'activity') renderActivity();
     if (S.view === 'ideas') renderIdeas();
+    if (S.view === 'press') renderPress();
   }
   function refresh() {
     compute();
@@ -3070,6 +3180,14 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if ((el = t.closest('[data-deny]'))) return deny(el.dataset.deny);
     if (t.closest('[data-queue-toggle]')) { S.queueOpen = !S.queueOpen; save('queueOpen'); return renderActivity(); }
     if (t.closest('[data-toggle-denied]')) { showDenied = !showDenied; return renderQueue(); }
+    if ((el = t.closest('[data-pmode]'))) { S.pressMode = el.dataset.pmode; save('pressMode'); return renderPress(); }
+    if ((el = t.closest('[data-pstage]'))) { S.pressStage = S.pressStage === el.dataset.pstage ? 'all' : el.dataset.pstage; return renderPress(); }
+    if ((el = t.closest('[data-pjump]'))) { S.pressMode = 'coverage'; save('pressMode'); S.q = el.dataset.pjump; renderPress(); return $('#press').scrollTo({ top: 0 }); }
+    if ((el = t.closest('[data-found]'))) {
+      const id = el.dataset.found, v = el.dataset.v, x = pressFound().find(f => f.id === id);
+      S.decisions[id] = v; save('decisions'); refresh();
+      return toast(v === 'approved' ? `Added ${x ? x.outlet : 'it'} to coverage` : 'Dismissed', () => { delete S.decisions[id]; save('decisions'); refresh(); });
+    }
     if (t.closest('[data-show-done]')) { S.showDone = !S.showDone; save('showDone'); return renderActivity(); }
     if ((el = t.closest('[data-keep-upd]'))) { const id = el.dataset.keepUpd; setAct(id, { upd: true }); S.openCards.delete(id); refresh(); return toast('Kept as an update', () => { setAct(id, { upd: false }); refresh(); }); }
     if ((el = t.closest('[data-make-todo]'))) { const id = el.dataset.makeTodo; setAct(id, { upd: false }); S.openCards.delete(id); refresh(); return toast('Moved to to-dos', () => { setAct(id, { upd: true }); refresh(); }); }
@@ -3202,7 +3320,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 
   document.addEventListener('input', e => {
     const t = e.target;
-    if (t.matches('#q-timeline, #q-calendar, #q-activity, #q-ideas')) {
+    if (t.matches('#q-timeline, #q-calendar, #q-activity, #q-ideas, #q-press')) {
       S.q = t.value;
       const id = t.id, pos = t.selectionStart;
       compute(); renderPulse();
@@ -3241,6 +3359,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     if (e.key === '2') return setView('ideas');
     if (e.key === '3') return setView('timeline');
     if (e.key === '4') return setView('calendar');
+    if (e.key === '5') return setView('press');
     if (e.key === '/') { e.preventDefault(); const s = $(`#q-${S.view}`); return s && s.focus(); }
     if (e.key === 't' && S.view === 'timeline') return scrollGanttToToday(true);
   });
@@ -3322,6 +3441,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   // ── Share: the team file ───────────────────────────────────────────────
   function teamPayload() {
     const data = JSON.parse(JSON.stringify(DATA));
+    if (data.press) data.press.coverage = pressCoverage().map(({ found, ...x }) => x);
     data.items = data.items.map(it => {
       const m = { ...it, ...(S.overrides[it.id] || {}) };
       Object.keys(m).forEach(k => { if (m[k] === null) delete m[k]; });
@@ -3382,7 +3502,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   }
 
   // ── Boot ───────────────────────────────────────────────────────────────
-  const VIEWS = ['activity', 'ideas', 'timeline', 'calendar'];
+  const VIEWS = ['activity', 'ideas', 'timeline', 'calendar', 'press'];
   const [hv, hid] = decodeURIComponent(location.hash.slice(1)).split('/');
   if (VIEWS.includes(hv)) S.view = hv;
   if (!VIEWS.includes(S.view)) S.view = 'activity';
