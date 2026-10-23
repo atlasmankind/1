@@ -1569,7 +1569,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
   }
   document.addEventListener('error', e => { if (e.target.matches && e.target.matches('img[data-img]')) e.target.classList.add('broken'); }, true);
   const imgTag = (m, full) => `<img data-img="${esc(full ? m.f : 't-' + m.f)}" alt="" loading="lazy" decoding="async" width="${m.w}" height="${m.h}">`;
-  const media = it => [...(it.media || []), ...(it.slides || [])];
+  const media = it => it.media || [];
 
   // ── Cards ──
   const seriesWord = it => (it.series === true ? 'Series' : it.series === false ? 'One-off' : 'One-off or series');
@@ -1581,9 +1581,9 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
 
   function coverHtml(it) {
     const ims = (it.media || []).slice(0, 3);
-    if (ims.length) return `<span class="icover n${ims.length}" aria-hidden="true">${ims.map(m => `<span class="icover-i">${imgTag(m)}</span>`).join('')}</span>`;
-    const sl = (it.slides || [])[0];
-    return sl ? `<span class="icover n1 slide" aria-hidden="true"><span class="icover-i">${imgTag(sl)}</span></span>` : '<span class="icover none" aria-hidden="true"><span>No images in the deck</span></span>';
+    return ims.length
+      ? `<span class="icover n${ims.length}" aria-hidden="true">${ims.map(m => `<span class="icover-i">${imgTag(m)}</span>`).join('')}</span>`
+      : '<span class="icover none" aria-hidden="true"><span>No images in the deck</span></span>';
   }
   function ideaCard(it) {
     return `<button class="idea" type="button" data-idea="${esc(it.id)}">
@@ -1634,7 +1634,7 @@ button.avatar:hover { border-color: var(--line-3); background: var(--s3); }
     const sec = (h, inner) => `<section><h3>${h}<span class="grow"></span></h3>${inner}</section>`;
     const ms = media(it);
     let body = '';
-    if (ms.length) body += sec(`From the deck<span class="lbl" style="color:var(--ink-4)">${plural(ms.length, 'image')}</span>`, `<div class="igal">${ms.map((m, k) => `<button class="ifig ${m.cap ? 'is-slide' : ''}" data-lightbox="${esc(it.id)}" data-k="${k}" aria-label="${esc(m.cap || `Image ${k + 1}`)}, open larger">${imgTag(m)}${m.cap ? `<span class="cap">${esc(m.cap)}</span>` : ''}</button>`).join('')}</div>`);
+    if (ms.length) body += sec(`From the deck<span class="lbl" style="color:var(--ink-4)">${plural(ms.length, 'image')}</span>`, `<div class="igal">${ms.map((m, k) => `<button class="ifig" data-lightbox="${esc(it.id)}" data-k="${k}" aria-label="Image ${k + 1}, open larger">${imgTag(m)}</button>`).join('')}</div>`);
     body += sec('The idea', `<p class="notes">${esc(it.desc)}</p>`);
     if (it.goal) body += sec('What it does for Atlas', `<p class="notes">${esc(it.goal)}</p>`);
     if (it.plan) body += sec('In the email plan', `<p class="notes">Campaign ${esc(it.plan)} in the plan we sent over.</p>`);
